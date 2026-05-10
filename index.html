@@ -2349,9 +2349,10 @@ setInterval(updateCountdown, 60000);
 loadWeather();
 
 // === Real-time Notifications ===
-let lastNotificationTime = Date.now();
+let lastNotificationTime = Date.now() - 30000;
 const notificationQueue = new Set();
 const anthemAudio = new Audio('/uefa_anthem.m4a');
+anthemAudio.volume = 0.7;
 
 function showNotification(message, type = 'default') {
   const container = document.getElementById('toastContainer');
@@ -2376,9 +2377,17 @@ async function pollNotifications() {
   try {
     const since = lastNotificationTime;
     const res = await fetch('/api/notify?since=' + since);
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error('Notify endpoint error:', res.status);
+      return;
+    }
 
     const data = await res.json();
+    if (!data.events || data.events.length === 0) {
+      return;
+    }
+
+    console.log('New events:', data.events);
     lastNotificationTime = data.timestamp;
 
     for (const event of data.events) {
@@ -2393,16 +2402,33 @@ async function pollNotifications() {
       showNotification(message, isBirdie ? 'birdie' : 'beer');
 
       if (isBirdie) {
-        anthemAudio.currentTime = 0;
-        anthemAudio.play().catch(() => {});
+        console.log('Playing anthem...');
+        setTimeout(() => {
+          anthemAudio.currentTime = 0;
+          anthemAudio.play().catch(err => {
+            console.warn('Autoplay blocked, waiting for user gesture...');
+            // If autoplay is blocked, make the notification clickable to play
+            const notif = document.querySelector('.toast.birdie:last-child');
+            if (notif) {
+              notif.style.cursor = 'pointer';
+              notif.title = 'Klick zum Abspielen der Hymne';
+              notif.onclick = () => {
+                anthemAudio.currentTime = 0;
+                anthemAudio.play();
+              };
+            }
+          });
+        }, 100);
       }
     }
   } catch (e) {
-    // Silent fail for notifications
+    console.error('Poll notification error:', e);
   }
 }
 
 // Start polling for notifications every 2 seconds
+console.log('Starting notification polling...');
+pollNotifications(); // Initial check
 setInterval(pollNotifications, 2000);
 
 // Cloud-Sync: Initial laden + alle 30 Sek. refreshen
