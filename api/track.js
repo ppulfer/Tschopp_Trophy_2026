@@ -41,7 +41,8 @@ export default async function handler(request) {
       });
     }
 
-    const key = player + '__' + field;
+    const today = new Date().toISOString().split('T')[0];
+    const key = player + '__' + field + '__' + today;
     const newVal = await kv.hincrby('trip_stats', key, d);
     // Verhindere negative Werte
     if (newVal < 0) {

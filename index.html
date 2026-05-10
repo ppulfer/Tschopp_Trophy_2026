@@ -1741,6 +1741,7 @@ async function fetchCloudStats() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     CLOUD_STATS = data || {};
+    migrateOldFormat();
     CLOUD_AVAILABLE = true;
     // Backup im localStorage
     localStorage.setItem('tt2026__cloudCache', JSON.stringify(CLOUD_STATS));
@@ -1754,6 +1755,20 @@ async function fetchCloudStats() {
       try { CLOUD_STATS = JSON.parse(cached); } catch (_) {}
     }
     return false;
+  }
+}
+
+function migrateOldFormat() {
+  const today = new Date().toISOString().split('T')[0];
+  const oldKeys = Object.keys(CLOUD_STATS).filter(k => !k.includes('__' + today) && k.match(/^[a-z]+__[a-z]+$/));
+  for (const oldKey of oldKeys) {
+    const val = CLOUD_STATS[oldKey];
+    const parts = oldKey.split('__');
+    if (parts.length === 2) {
+      const newKey = oldKey + '__' + today;
+      if (!CLOUD_STATS[newKey]) CLOUD_STATS[newKey] = val;
+      delete CLOUD_STATS[oldKey];
+    }
   }
 }
 
@@ -1814,8 +1829,19 @@ async function flushPendingTracks() {
   }
 }
 
-function getCloudValue(playerKey, field) {
-  return parseInt(CLOUD_STATS[playerKey + '__' + field] || '0', 10);
+function getCloudValue(playerKey, field, date = null) {
+  if (!date) date = new Date().toISOString().split('T')[0];
+  return parseInt(CLOUD_STATS[playerKey + '__' + field + '__' + date] || '0', 10);
+}
+
+function getTotalCloudValue(playerKey, field) {
+  let total = 0;
+  for (const key in CLOUD_STATS) {
+    if (key.startsWith(playerKey + '__' + field + '__')) {
+      total += parseInt(CLOUD_STATS[key] || '0', 10);
+    }
+  }
+  return total;
 }
 
 function refreshAllStatsUI() {
@@ -1844,9 +1870,10 @@ function adjust(type, delta) {
 
 function updateBeer() {
   const todayCount = currentProfile ? getCloudValue(currentProfile, 'beer') : 0;
+  const totalCount = currentProfile ? getTotalCloudValue(currentProfile, 'beer') : 0;
   document.getElementById('beerToday').textContent = todayCount;
-  document.getElementById('beerTotal').textContent = todayCount + ' 🍺';
-  document.getElementById('beerRecord').textContent = todayCount;
+  document.getElementById('beerTotal').textContent = totalCount + ' 🍺';
+  document.getElementById('beerRecord').textContent = totalCount;
   if (todayCount === 100) toast('🥚 EASTER EGG: 100-Bier-Marke! Legende!');
   updatePromille();
 }
@@ -1881,7 +1908,7 @@ function updatePromille() {
 }
 
 function updateBalls() {
-  const total = currentProfile ? getCloudValue(currentProfile, 'balls') : 0;
+  const total = currentProfile ? getTotalCloudValue(currentProfile, 'balls') : 0;
   document.getElementById('ballsLost').textContent = total;
   const est = document.getElementById('ballEstimate');
   if (total === 0) {
@@ -1904,7 +1931,7 @@ function updateBalls() {
 }
 
 function updateBirdies() {
-  const total = currentProfile ? getCloudValue(currentProfile, 'birdies') : 0;
+  const total = currentProfile ? getTotalCloudValue(currentProfile, 'birdies') : 0;
   const el = document.getElementById('birdiesCount');
   if (el) el.textContent = total;
 }
@@ -1919,9 +1946,9 @@ function updateTripStats() {
   let topBirdiesPlayer = null, topBirdiesCount = 0;
 
   PLAYERS.forEach(p => {
-    const beer = getCloudValue(p.key, 'beer');
-    const balls = getCloudValue(p.key, 'balls');
-    const birdies = getCloudValue(p.key, 'birdies');
+    const beer = getTotalCloudValue(p.key, 'beer');
+    const balls = getTotalCloudValue(p.key, 'balls');
+    const birdies = getTotalCloudValue(p.key, 'birdies');
 
     totalBeer += beer;
     if (beer > topBeerCount) { topBeerCount = beer; topBeerPlayer = p; }
