@@ -18,9 +18,12 @@ export default async function handler(request) {
     let events = [];
     try {
       // Get all events from the sorted set
+      console.log('Fetching events with zrange(game_events, 0, -1)');
       events = await kv.zrange('game_events', 0, -1);
+      console.log('zrange result count:', events?.length || 0);
+      console.log('Raw events:', events);
     } catch (kvError) {
-      console.warn('KV error (local dev?):', kvError.message);
+      console.error('KV zrange error:', kvError.message);
       // In local dev, KV might not be available - return empty list
       return new Response(JSON.stringify({ events: [], timestamp: Date.now() }), {
         status: 200,
