@@ -1741,6 +1741,7 @@ async function fetchCloudStats() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     CLOUD_STATS = data || {};
+    migrateOldFormat();
     CLOUD_AVAILABLE = true;
     // Backup im localStorage
     localStorage.setItem('tt2026__cloudCache', JSON.stringify(CLOUD_STATS));
@@ -1754,6 +1755,20 @@ async function fetchCloudStats() {
       try { CLOUD_STATS = JSON.parse(cached); } catch (_) {}
     }
     return false;
+  }
+}
+
+function migrateOldFormat() {
+  const today = new Date().toISOString().split('T')[0];
+  const oldKeys = Object.keys(CLOUD_STATS).filter(k => !k.includes('__' + today) && k.match(/^[a-z]+__[a-z]+$/));
+  for (const oldKey of oldKeys) {
+    const val = CLOUD_STATS[oldKey];
+    const parts = oldKey.split('__');
+    if (parts.length === 2) {
+      const newKey = oldKey + '__' + today;
+      if (!CLOUD_STATS[newKey]) CLOUD_STATS[newKey] = val;
+      delete CLOUD_STATS[oldKey];
+    }
   }
 }
 
