@@ -2426,10 +2426,10 @@ async function pollNotifications() {
   }
 }
 
-// Start polling for notifications every 2 seconds
+// Start polling for notifications every 30 seconds
 console.log('Starting notification polling...');
 pollNotifications(); // Initial check
-setInterval(pollNotifications, 2000);
+setInterval(pollNotifications, 30000);
 
 // Cloud-Sync: Initial laden + alle 30 Sek. refreshen
 fetchCloudStats().then(() => refreshAllStatsUI());
