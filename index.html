@@ -1731,9 +1731,10 @@ function updateCountdown() {
 }
 
 // === CLOUD SYNC ===
-// State holds aggregated stats per player {playerKey__field: value}
+// State holds aggregated stats per player {playerKey__field__date: value}
 let CLOUD_STATS = {};
 let CLOUD_AVAILABLE = true;
+let TOTAL_CACHE = {};
 
 async function fetchCloudStats() {
   try {
@@ -1741,6 +1742,7 @@ async function fetchCloudStats() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     CLOUD_STATS = data || {};
+    TOTAL_CACHE = {};
     migrateOldFormat();
     CLOUD_AVAILABLE = true;
     // Backup im localStorage
@@ -1777,9 +1779,12 @@ async function trackCloud(field, delta) {
   const key = currentProfile + '__' + field;
 
   // Optimistic update — sofort lokal aktualisieren für instant feedback
-  const oldVal = parseInt(CLOUD_STATS[key] || '0', 10);
+  const today = new Date().toISOString().split('T')[0];
+  const todayKey = currentProfile + '__' + field + '__' + today;
+  const oldVal = parseInt(CLOUD_STATS[todayKey] || '0', 10);
   const newVal = Math.max(0, oldVal + delta);
-  CLOUD_STATS[key] = newVal;
+  CLOUD_STATS[todayKey] = newVal;
+  invalidateTotalCache(currentProfile, field);
   refreshAllStatsUI();
 
   // Send to API
@@ -1792,7 +1797,8 @@ async function trackCloud(field, delta) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     // Server-Wert übernehmen (falls drift)
-    CLOUD_STATS[key] = data.value;
+    CLOUD_STATS[todayKey] = data.value;
+    invalidateTotalCache(currentProfile, field);
     localStorage.setItem('tt2026__cloudCache', JSON.stringify(CLOUD_STATS));
     CLOUD_AVAILABLE = true;
     refreshAllStatsUI();
@@ -1835,13 +1841,23 @@ function getCloudValue(playerKey, field, date = null) {
 }
 
 function getTotalCloudValue(playerKey, field) {
+  const cacheKey = playerKey + '__' + field;
+  if (TOTAL_CACHE[cacheKey] !== undefined) return TOTAL_CACHE[cacheKey];
+
   let total = 0;
+  const prefix = playerKey + '__' + field + '__';
   for (const key in CLOUD_STATS) {
-    if (key.startsWith(playerKey + '__' + field + '__')) {
+    if (key.startsWith(prefix)) {
       total += parseInt(CLOUD_STATS[key] || '0', 10);
     }
   }
+  TOTAL_CACHE[cacheKey] = total;
   return total;
+}
+
+function invalidateTotalCache(playerKey, field) {
+  const cacheKey = playerKey + '__' + field;
+  delete TOTAL_CACHE[cacheKey];
 }
 
 function refreshAllStatsUI() {
