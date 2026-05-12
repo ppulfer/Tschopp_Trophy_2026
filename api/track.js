@@ -52,20 +52,19 @@ export default async function handler(request) {
       await kv.hset('trip_stats', { [key]: 0 });
     }
 
-    // Publish notification for birdies and beers
-    if ((field === 'birdies' || field === 'beer') && d > 0) {
+    // Publish notification for birdies, beers, and balls (both added and removed)
+    if ((field === 'birdies' || field === 'beer' || field === 'balls') && d !== 0) {
       const finalValue = Math.max(0, newVal);
       const timestamp = Date.now();
-      const eventData = JSON.stringify({ player, field, value: finalValue, timestamp });
+      const eventField = d > 0 ? field : `${field}_removed`;
+      const eventData = JSON.stringify({ player, field: eventField, value: finalValue, timestamp });
       try {
-        await kv.zadd('game_events', timestamp, eventData);
-        // Keep only last 100 events by removing oldest
-        const count = await kv.zcard('game_events');
-        if (count > 100) {
-          await kv.zpopmin('game_events', count - 100);
-        }
+        // Store as JSON string with timestamp key
+        const key = `event:${timestamp}:${player}:${eventField}`;
+        await kv.set(key, eventData, { ex: 2592000 }); // 30 days TTL
+        console.log('EVENT_SAVED', key);
       } catch (e) {
-        console.error('KV zadd error:', e);
+        console.error('KV_ERROR', e.message);
       }
     }
 

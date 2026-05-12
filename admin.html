@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Tschopp Trophy 2026</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 20px;
+  background: #0e2920; color: #f3ead2;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px; line-height: 1.5;
+}
+a { color: #d4b14a; }
+h1 { color: #d4b14a; margin: 0 0 4px; }
+h2 { color: #e9cd6f; font-size: 16px; margin: 24px 0 10px; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+.auth-bar {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 20px;
+}
+.auth-bar input {
+  background: #1a4233; color: #f3ead2;
+  border: 1px solid rgba(212,177,74,0.3); border-radius: 6px;
+  padding: 8px 12px; font-size: 14px; width: 200px;
+}
+
+button {
+  background: #d4b14a; color: #0e2920;
+  padding: 8px 16px; border: none; border-radius: 6px;
+  font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px;
+}
+button:hover { background: #e9cd6f; }
+button.ghost { background: transparent; color: #d4b14a; border: 1px solid #d4b14a; }
+button.ghost:hover { background: rgba(212,177,74,0.1); }
+button.danger { background: transparent; color: #c5634d; border: 1px solid #c5634d; padding: 4px 10px; font-size: 12px; }
+button.danger:hover { background: rgba(197,99,77,0.15); }
+button.save { background: #4ea36b; color: #fff; padding: 4px 10px; font-size: 12px; }
+button.save:hover { background: #5cb87a; }
+
+.status { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+.status.success { background: rgba(78,163,107,0.2); border: 1px solid #4ea36b; color: #4ea36b; }
+.status.error { background: rgba(197,99,77,0.2); border: 1px solid #c5634d; color: #c5634d; }
+.status.info { background: rgba(212,177,74,0.1); border: 1px solid rgba(212,177,74,0.3); color: #d4b14a; }
+
+/* Stats table */
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 8px 10px;
+  background: #1a4233; color: #e9cd6f;
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  position: sticky; top: 0;
+}
+tbody tr { border-bottom: 1px solid rgba(212,177,74,0.08); }
+tbody tr:hover { background: rgba(212,177,74,0.04); }
+td { padding: 8px 10px; }
+.td-key { color: #9bb0a4; font-size: 12px; font-family: monospace; }
+.td-player { font-weight: 600; color: #d4b14a; }
+.td-date { color: #9bb0a4; font-size: 12px; }
+
+.val-input {
+  background: #0e2920; color: #f3ead2;
+  border: 1px solid rgba(212,177,74,0.3); border-radius: 4px;
+  padding: 4px 8px; font-size: 14px; width: 70px; text-align: center;
+}
+.val-input:focus { outline: 1px solid #d4b14a; }
+
+.actions { display: flex; gap: 6px; align-items: center; }
+
+/* Add row form */
+.add-section {
+  background: #143729; border: 1px solid rgba(212,177,74,0.2);
+  border-radius: 8px; padding: 16px; margin-top: 16px;
+}
+.add-form {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+}
+.add-form .field { display: flex; flex-direction: column; gap: 4px; }
+.add-form label { font-size: 11px; color: #9bb0a4; text-transform: uppercase; }
+.add-form input, .add-form select {
+  background: #0e2920; color: #f3ead2;
+  border: 1px solid rgba(212,177,74,0.3); border-radius: 6px;
+  padding: 8px 10px; font-size: 14px; font-family: inherit;
+}
+.add-form select { min-width: 140px; }
+
+/* Summary row */
+.player-summary {
+  background: #1a4233; border: 1px solid rgba(212,177,74,0.15); border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.player-summary:hover { background: #1f4d3c; }
+.player-summary .name { font-weight: 700; color: #d4b14a; flex: 1; }
+.player-summary .totals { display: flex; gap: 16px; font-size: 13px; color: #9bb0a4; }
+.player-summary .totals span { display: flex; align-items: center; gap: 4px; }
+.chevron { transition: transform 0.2s; margin-left: auto; color: #9bb0a4; }
+.chevron.open { transform: rotate(90deg); }
+.player-rows { display: none; }
+.player-rows.open { display: block; margin-bottom: 12px; }
+
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.filter-bar input, .filter-bar select {
+  background: #1a4233; color: #f3ead2;
+  border: 1px solid rgba(212,177,74,0.2); border-radius: 6px;
+  padding: 6px 10px; font-size: 13px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <p style="margin:0 0 4px"><a href="/">← Back to App</a></p>
+  <h1>⚙️ Stats Admin</h1>
+
+  <div class="auth-bar">
+    <button onclick="loadStats()">🔄 Load Stats</button>
+  </div>
+
+  <div id="statusMsg"></div>
+  <div id="statsContent"></div>
+</div>
+
+<script>
+const PLAYER_NICKNAMES = {
+  'parli': 'Parli', 'schrafl': 'Consti', 'hodgskin': 'Hodgskin',
+  'pulfer': 'Pulfer', 'fzimmermann': 'Flo', 'teulings': 'Teulings',
+  'ruetimann': 'Ruetimann', 'wieser': 'Karl', 'laenzlinger': 'Laenzlinger',
+  'hunter': 'Hunter', 'graf': 'Graf', 'debrunner': 'Debrunner',
+  'szimmermann': 'Zimmi', 'heule': 'Heule', 'wyser': 'Choco'
+};
+
+const FIELD_LABELS = { birdies: '🏌️ Birdies', beer: '🍺 Beers', balls: '⚪ Balls' };
+
+let currentStats = {};
+
+function showStatus(msg, type = 'info') {
+  document.getElementById('statusMsg').innerHTML = `<div class="status ${type}">${msg}</div>`;
+}
+
+function clearStatus() {
+  document.getElementById('statusMsg').innerHTML = '';
+}
+
+async function loadStats() {
+  showStatus('Loading...', 'info');
+  try {
+    const res = await fetch(`/api/admin`);
+    if (res.status === 401) { showStatus('Wrong password', 'error'); return; }
+    currentStats = await res.json();
+    renderStats();
+    clearStatus();
+  } catch (e) {
+    showStatus(`Error: ${e.message}`, 'error');
+  }
+}
+
+function renderStats() {
+  // Group by player
+  const grouped = {};
+  for (const [key, value] of Object.entries(currentStats)) {
+    const parts = key.split('__');
+    if (parts.length !== 3) continue;
+    const [player, field, date] = parts;
+    if (!grouped[player]) grouped[player] = [];
+    grouped[player].push({ key, player, field, date, value: parseInt(value, 10) });
+  }
+
+  // Sort players by name
+  const players = Object.keys(grouped).sort((a, b) =>
+    (PLAYER_NICKNAMES[a] || a).localeCompare(PLAYER_NICKNAMES[b] || b)
+  );
+
+  const html = players.map(player => {
+    const rows = grouped[player].sort((a, b) => a.date.localeCompare(b.date) || a.field.localeCompare(b.field));
+    const totals = { birdies: 0, beer: 0, balls: 0 };
+    rows.forEach(r => { if (totals[r.field] !== undefined) totals[r.field] += r.value; });
+
+    const rowsHtml = rows.map(r => `
+      <tr>
+        <td class="td-date">${r.date}</td>
+        <td>${FIELD_LABELS[r.field] || r.field}</td>
+        <td>
+          <input class="val-input" type="number" min="0" value="${r.value}"
+            id="input__${r.key}" onkeydown="if(event.key==='Enter')saveRow('${r.key}')">
+        </td>
+        <td>
+          <div class="actions">
+            <button class="save" onclick="saveRow('${r.key}')">Save</button>
+            <button class="danger" onclick="deleteRow('${r.key}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    return `
+      <div class="player-summary" onclick="togglePlayer('${player}')">
+        <span class="name">${PLAYER_NICKNAMES[player] || player}</span>
+        <span class="totals">
+          <span>🏌️ ${totals.birdies}</span>
+          <span>🍺 ${totals.beer}</span>
+          <span>⚪ ${totals.balls}</span>
+        </span>
+        <span class="chevron" id="chevron__${player}">▶</span>
+      </div>
+      <div class="player-rows" id="rows__${player}">
+        <table>
+          <thead><tr><th>Date</th><th>Type</th><th>Value</th><th>Actions</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('statsContent').innerHTML = `
+    ${html}
+    <div class="add-section">
+      <h2 style="margin-top:0">Add / Override Stat</h2>
+      <div class="add-form">
+        <div class="field">
+          <label>Player</label>
+          <select id="addPlayer">
+            ${Object.entries(PLAYER_NICKNAMES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select id="addField">
+            <option value="birdies">Birdies</option>
+            <option value="beer">Beers</option>
+            <option value="balls">Balls</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date (YYYY-MM-DD)</label>
+          <input type="text" id="addDate" value="${new Date().toISOString().split('T')[0]}" style="width:140px">
+        </div>
+        <div class="field">
+          <label>Value</label>
+          <input type="number" id="addValue" value="1" min="0" style="width:80px">
+        </div>
+        <button onclick="addStat()">Add / Set</button>
+      </div>
+    </div>
+  `;
+}
+
+function togglePlayer(player) {
+  const rows = document.getElementById(`rows__${player}`);
+  const chevron = document.getElementById(`chevron__${player}`);
+  rows.classList.toggle('open');
+  chevron.classList.toggle('open');
+  if (chevron.classList.contains('open')) chevron.textContent = '▼';
+  else chevron.textContent = '▶';
+}
+
+async function saveRow(key) {
+  const input = document.getElementById(`input__${key}`);
+  const value = parseInt(input.value, 10);
+  if (isNaN(value) || value < 0) { showStatus('Invalid value', 'error'); return; }
+
+  try {
+    const res = await fetch(`/api/admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'set', key, value })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    currentStats[key] = value;
+    showStatus(`Saved: ${key} = ${value}`, 'success');
+  } catch (e) {
+    showStatus(`Error: ${e.message}`, 'error');
+  }
+}
+
+async function deleteRow(key) {
+  if (!confirm(`Delete "${key}"?`)) return;
+  try {
+    const res = await fetch(`/api/admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', key })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    delete currentStats[key];
+    showStatus(`Deleted: ${key}`, 'success');
+    renderStats();
+  } catch (e) {
+    showStatus(`Error: ${e.message}`, 'error');
+  }
+}
+
+async function addStat() {
+  const player = document.getElementById('addPlayer').value;
+  const field = document.getElementById('addField').value;
+  const date = document.getElementById('addDate').value.trim();
+  const value = parseInt(document.getElementById('addValue').value, 10);
+
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) { showStatus('Invalid date format', 'error'); return; }
+  if (isNaN(value) || value < 0) { showStatus('Invalid value', 'error'); return; }
+
+  const key = `${player}__${field}__${date}`;
+  try {
+    const res = await fetch(`/api/admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'set', key, value })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    currentStats[key] = value;
+    showStatus(`Set: ${key} = ${value}`, 'success');
+    renderStats();
+  } catch (e) {
+    showStatus(`Error: ${e.message}`, 'error');
+  }
+}
+
+loadStats();
+</script>
+</body>
+</html>
