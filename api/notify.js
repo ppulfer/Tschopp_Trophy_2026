@@ -19,29 +19,35 @@ export default async function handler(request) {
     try {
       console.log('NOTIFY_START', { since });
 
-      // Get list length first
-      const listLength = await kv.llen('game_events_list');
-      console.log('LIST_LENGTH', listLength);
+      // Get all event keys matching pattern
+      const allKeys = await kv.keys('event:*');
+      console.log('FOUND_KEYS', { count: allKeys?.length || 0 });
 
-      // Get all events from list
-      const eventStrings = await kv.lrange('game_events_list', 0, -1);
-      console.log('LRANGE_RESULT', { count: eventStrings?.length || 0, sample: eventStrings?.[0] });
+      if (allKeys && allKeys.length > 0) {
+        // Get all events
+        const eventValues = await Promise.all(
+          allKeys.map(key => kv.get(key))
+        );
 
-      // Parse JSON strings (don't filter by since - client will handle it)
-      events = (eventStrings || [])
-        .map(str => {
-          try {
-            return JSON.parse(str);
-          } catch (e) {
-            console.error('PARSE_ERROR', { error: e.message, str });
-            return null;
-          }
-        })
-        .filter(Boolean);
+        events = eventValues
+          .map((value, idx) => {
+            try {
+              // Value is already parsed by Vercel KV
+              const event = typeof value === 'string' ? JSON.parse(value) : value;
+              // Only return events newer than 'since'
+              return event.timestamp >= since ? event : null;
+            } catch (e) {
+              console.error('PARSE_ERROR', { key: allKeys[idx], error: e.message });
+              return null;
+            }
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.timestamp - a.timestamp); // Newest first
 
-      console.log('FILTERED_EVENTS', { count: events.length, since, now: Date.now() });
+        console.log('PARSED_EVENTS', { total: events.length, since });
+      }
     } catch (kvError) {
-      console.error('KV_ERROR', { message: kvError.message, stack: kvError.stack });
+      console.error('KV_ERROR', kvError.message);
     }
 
     // Always return valid response
