@@ -52,27 +52,19 @@ export default async function handler(request) {
       await kv.hset('trip_stats', { [key]: 0 });
     }
 
-    // Publish notification for birdies and beers
-    if ((field === 'birdies' || field === 'beer') && d > 0) {
+    // Publish notification for birdies, beers, and balls (both added and removed)
+    if ((field === 'birdies' || field === 'beer' || field === 'balls') && d !== 0) {
       const finalValue = Math.max(0, newVal);
       const timestamp = Date.now();
-      const eventData = JSON.stringify({ player, field, value: finalValue, timestamp });
+      const eventField = d > 0 ? field : `${field}_removed`;
+      const eventData = JSON.stringify({ player, field: eventField, value: finalValue, timestamp });
       try {
-        console.log('EVENT_SAVE_START', { player, field, timestamp, eventData });
-
-        // Try lpush
-        const pushResult = await kv.lpush('game_events_list', eventData);
-        console.log('LPUSH_RESULT', pushResult);
-
-        // Check if it was saved
-        const checkResult = await kv.llen('game_events_list');
-        console.log('LIST_LENGTH_AFTER', checkResult);
-
-        // Keep only last 100 events
-        await kv.ltrim('game_events_list', 0, 99);
-        console.log('EVENT_SAVE_COMPLETE');
+        // Store as JSON string with timestamp key
+        const key = `event:${timestamp}:${player}:${eventField}`;
+        await kv.set(key, eventData, { ex: 2592000 }); // 30 days TTL
+        console.log('EVENT_SAVED', key);
       } catch (e) {
-        console.error('KV_ERROR', { message: e.message, stack: e.stack });
+        console.error('KV_ERROR', e.message);
       }
     }
 
