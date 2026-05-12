@@ -58,14 +58,21 @@ export default async function handler(request) {
       const timestamp = Date.now();
       const eventData = JSON.stringify({ player, field, value: finalValue, timestamp });
       try {
-        console.log('Saving event:', { player, field, timestamp });
-        // Store event as simple list in Redis (more reliable than sorted set)
-        await kv.lpush('game_events_list', eventData);
+        console.log('EVENT_SAVE_START', { player, field, timestamp, eventData });
+
+        // Try lpush
+        const pushResult = await kv.lpush('game_events_list', eventData);
+        console.log('LPUSH_RESULT', pushResult);
+
+        // Check if it was saved
+        const checkResult = await kv.llen('game_events_list');
+        console.log('LIST_LENGTH_AFTER', checkResult);
+
         // Keep only last 100 events
         await kv.ltrim('game_events_list', 0, 99);
-        console.log('Event saved');
+        console.log('EVENT_SAVE_COMPLETE');
       } catch (e) {
-        console.error('KV error:', e.message);
+        console.error('KV_ERROR', { message: e.message, stack: e.stack });
       }
     }
 

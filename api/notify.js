@@ -17,9 +17,15 @@ export default async function handler(request) {
 
     let events = [];
     try {
+      console.log('NOTIFY_START', { since });
+
+      // Get list length first
+      const listLength = await kv.llen('game_events_list');
+      console.log('LIST_LENGTH', listLength);
+
       // Get all events from list
       const eventStrings = await kv.lrange('game_events_list', 0, -1);
-      console.log('Events from Redis:', eventStrings?.length || 0);
+      console.log('LRANGE_RESULT', { count: eventStrings?.length || 0, sample: eventStrings?.[0] });
 
       // Parse JSON strings and filter by timestamp
       events = (eventStrings || [])
@@ -28,15 +34,15 @@ export default async function handler(request) {
             const parsed = JSON.parse(str);
             return parsed.timestamp >= since ? parsed : null;
           } catch (e) {
-            console.error('Parse error:', e);
+            console.error('PARSE_ERROR', { error: e.message, str });
             return null;
           }
         })
         .filter(Boolean);
 
-      console.log('Filtered events:', events.length);
+      console.log('FILTERED_EVENTS', { count: events.length, since, now: Date.now() });
     } catch (kvError) {
-      console.error('KV error:', kvError.message);
+      console.error('KV_ERROR', { message: kvError.message, stack: kvError.stack });
     }
 
     // Always return valid response
