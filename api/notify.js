@@ -17,61 +17,31 @@ export default async function handler(request) {
 
     let events = [];
     try {
-      // Get all events from list (newest first)
-      console.log('Fetching events from game_events_list');
+      // Get all events from list
       const eventStrings = await kv.lrange('game_events_list', 0, -1);
-      console.log('Events found:', eventStrings?.length || 0);
+      console.log('Events from Redis:', eventStrings?.length || 0);
 
-      // Parse and filter by timestamp
+      // Parse JSON strings and filter by timestamp
       events = (eventStrings || [])
         .map(str => {
           try {
-            return JSON.parse(str);
-          } catch {
+            const parsed = JSON.parse(str);
+            return parsed.timestamp >= since ? parsed : null;
+          } catch (e) {
+            console.error('Parse error:', e);
             return null;
           }
         })
-        .filter(Boolean)
-        .filter(e => e.timestamp >= since);
+        .filter(Boolean);
 
-      console.log('Events after filtering:', events.length);
+      console.log('Filtered events:', events.length);
     } catch (kvError) {
       console.error('KV error:', kvError.message);
-      // In local dev, KV might not be available - return empty list
-      return new Response(JSON.stringify({ events: [], timestamp: Date.now() }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-store',
-        },
-      });
     }
 
-    if (!events || events.length === 0) {
-      return new Response(JSON.stringify({ events: [], timestamp: Date.now() }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-store',
-        },
-      });
-    }
-
-    // Filter events by timestamp
-    const parsedEvents = events
-      .map(e => {
-        try {
-          return JSON.parse(e);
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean)
-      .filter(e => e.timestamp >= since);
-
-    return new Response(JSON.stringify({ events: parsedEvents, timestamp: Date.now() }), {
+    // Always return valid response
+    const response = { events: events || [], timestamp: Date.now() };
+    return new Response(JSON.stringify(response), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
