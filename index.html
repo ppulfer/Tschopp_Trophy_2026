@@ -629,10 +629,10 @@ footer {
 
 .now-playing {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 200;
+  z-index: 1000;
 }
 
 .now-playing-content {
@@ -679,58 +679,6 @@ footer {
   background: #333;
 }
 
-.sound-unlock-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sound-unlock-box {
-  background: #1a1a1a;
-  border: 2px solid var(--gold);
-  border-radius: 16px;
-  padding: 32px 28px;
-  text-align: center;
-  max-width: 300px;
-  width: 90%;
-}
-.sound-unlock-icon { font-size: 48px; margin-bottom: 12px; }
-.sound-unlock-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 8px;
-}
-.sound-unlock-desc {
-  font-size: 13px;
-  color: #aaa;
-  margin-bottom: 24px;
-  line-height: 1.5;
-}
-.sound-unlock-btn {
-  background: var(--gold);
-  color: var(--bg);
-  border: none;
-  padding: 14px 32px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  font-family: inherit;
-  width: 100%;
-  active: transform scale(0.97);
-}
-.sound-unlock-btn:active { transform: scale(0.97); }
-.sound-unlock-skip {
-  margin-top: 14px;
-  font-size: 12px;
-  color: #555;
-  cursor: pointer;
-  text-decoration: underline;
-}
 
 .notification-center {
   position: fixed;
@@ -859,15 +807,6 @@ footer {
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- Now Playing Anthem -->
-<div class="sound-unlock-overlay" id="soundUnlockOverlay" style="display:none;">
-  <div class="sound-unlock-box">
-    <div class="sound-unlock-icon">🔊</div>
-    <div class="sound-unlock-title">Ton aktivieren</div>
-    <div class="sound-unlock-desc">Tippe einmal um Birdie-Hymnen und Benachrichtigungen zu hören — auch wenn der Bildschirm gesperrt ist.</div>
-    <button class="sound-unlock-btn" id="soundUnlockBtn">Ton aktivieren</button>
-    <div class="sound-unlock-skip" id="soundUnlockSkip">Ohne Ton fortfahren</div>
-  </div>
-</div>
 
 <div class="now-playing" id="nowPlaying" style="display: none;">
   <div class="now-playing-content">
@@ -2651,42 +2590,6 @@ if ('mediaSession' in navigator) {
   });
 }
 
-// Audio unlock via user gesture (required on iOS, helps on Android first visit)
-const AUDIO_UNLOCKED_KEY = 'tt2026__audioUnlocked';
-let audioUnlocked = localStorage.getItem(AUDIO_UNLOCKED_KEY) === '1';
-
-function unlockAudio() {
-  // Play a silent buffer — this gesture-unlocks audio for the whole session
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const buf = ctx.createBuffer(1, 1, 22050);
-  const src = ctx.createBufferSource();
-  src.buffer = buf;
-  src.connect(ctx.destination);
-  src.start(0);
-  ctx.resume();
-  audioUnlocked = true;
-  localStorage.setItem(AUDIO_UNLOCKED_KEY, '1');
-}
-
-(function() {
-  const overlay = document.getElementById('soundUnlockOverlay');
-  const unlockBtn = document.getElementById('soundUnlockBtn');
-  const skipBtn = document.getElementById('soundUnlockSkip');
-
-  if (!audioUnlocked) {
-    overlay.style.display = 'flex';
-  }
-
-  unlockBtn.addEventListener('click', () => {
-    unlockAudio();
-    overlay.style.display = 'none';
-  });
-
-  skipBtn.addEventListener('click', () => {
-    overlay.style.display = 'none';
-    localStorage.setItem(AUDIO_UNLOCKED_KEY, 'skip');
-  });
-})();
 
 // Event cache
 const EVENT_CACHE_KEY = 'tt2026__eventCache';
@@ -2887,7 +2790,7 @@ async function pollNotifications() {
       const isBirdie = event.field === 'birdies';
       const isNewEvent = Date.now() - event.timestamp < 60000;
 
-      if (isBirdie && isNewEvent && !soundMuted && audioUnlocked && event.player !== currentProfile) {
+      if (isBirdie && isNewEvent && !soundMuted && event.player !== currentProfile) {
         console.log('Playing anthem...');
         setTimeout(() => {
           anthemAudio.currentTime = 0;
