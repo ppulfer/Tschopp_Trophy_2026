@@ -1345,6 +1345,33 @@ body.detail-open .notification-center {
   padding: 0;
 }
 
+.notification-quick-add {
+  display: flex;
+  gap: 6px;
+  padding: 10px 15px;
+  border-top: 1px solid rgba(212,177,74,0.1);
+  background: var(--bg-soft);
+}
+
+.notification-quick-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.notification-quick-btn:active {
+  background: var(--bg-soft);
+  border-color: var(--gold);
+}
+
 .notification-item {
   border-bottom: 1px solid rgba(212, 177, 74, 0.1);
   color: var(--text);
@@ -1548,6 +1575,11 @@ body.detail-open .notification-center {
     </div>
     <div class="notification-list" id="notificationList">
       <div class="empty-state">Keine Ereignisse</div>
+    </div>
+    <div class="notification-quick-add">
+      <button class="notification-quick-btn" id="quickAddBeer" title="Bier hinzufügen">🍺+1</button>
+      <button class="notification-quick-btn" id="quickAddBalls" title="Ball verloren">⚪+1</button>
+      <button class="notification-quick-btn" id="quickAddBirdies" title="Birdie">🏌️+1</button>
     </div>
   </div>
 </div>
@@ -4598,6 +4630,20 @@ async function saveFlightResult() {
 
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
+
+// Quick-add buttons in notification panel
+document.getElementById('quickAddBeer').addEventListener('click', () => {
+  adjust('beer', 1);
+  if (typeof updateBeer === 'function') updateBeer();
+});
+document.getElementById('quickAddBalls').addEventListener('click', () => {
+  adjust('balls', 1);
+  if (typeof updateBalls === 'function') updateBalls();
+});
+document.getElementById('quickAddBirdies').addEventListener('click', () => {
+  adjust('birdies', 1);
+  if (typeof updateBirdies === 'function') updateBirdies();
+});
 
 // === Legends (Hall of Fame seit 2012) ===
 const LEGENDS = [
