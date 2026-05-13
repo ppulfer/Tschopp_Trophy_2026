@@ -4109,19 +4109,17 @@ function openFlightDetail(date, fi, mi) {
       const pB = PLAYER_NICKNAMES[sideB[i]] || sideB[i] || `B${i+1}`;
       return `<button class="match-tab${i === detailMatchIdx ? ' active' : ''}" onclick="openFlightDetail('${date}',${fi},${i})">${pA} vs ${pB}</button>`;
     }).join('');
-    const pA = PLAYER_NICKNAMES[sideA[detailMatchIdx]] || sideA[detailMatchIdx] || '—';
-    const pB = PLAYER_NICKNAMES[sideB[detailMatchIdx]] || sideB[detailMatchIdx] || '—';
     document.getElementById('flightDetailPlayers').innerHTML = `
-      <span class="side-a">${pA}</span>
+      <span class="side-a">${styledName(sideA[detailMatchIdx])}</span>
       <span class="vs-label">vs</span>
-      <span class="side-b">${pB}</span>`;
+      <span class="side-b">${styledName(sideB[detailMatchIdx])}</span>`;
   } else {
     tabsEl.style.display = 'none';
     tabsEl.innerHTML = '';
     document.getElementById('flightDetailPlayers').innerHTML = `
-      <span class="side-a">${sideNames(sideA)}</span>
+      <span class="side-a">${styledNames(sideA)}</span>
       <span class="vs-label">vs</span>
-      <span class="side-b">${sideNames(sideB)}</span>`;
+      <span class="side-b">${styledNames(sideB)}</span>`;
   }
 
   document.getElementById('flightDetailHoles').scrollTop = 0;
@@ -4139,26 +4137,9 @@ function closeFlightDetail() {
   renderResultsTab();
 }
 
-function holeSideLabel(keys) {
-  const filtered = keys.filter(Boolean);
-  if (filtered.length === 0) return '–';
-  if (filtered.length === 1) {
-    const n = PLAYER_NICKNAMES[filtered[0]] || filtered[0];
-    return n.length > 9 ? n.slice(0, 8) + '…' : n;
-  }
-  return filtered.slice(0, 2).map(k => {
-    const n = PLAYER_NICKNAMES[k] || k;
-    return n.slice(0, 4);
-  }).join('/');
-}
-
 function renderHoleList() {
   const { afterHole, concludedOn, result } = calculateMatch(detailHoles);
   const { sideA, sideB } = getFlightSides(detailDate, detailFlightIdx);
-  const keysA = detailMatchIdx !== null ? [sideA[detailMatchIdx]] : sideA;
-  const keysB = detailMatchIdx !== null ? [sideB[detailMatchIdx]] : sideB;
-  const labelA = holeSideLabel(keysA);
-  const labelB = holeSideLabel(keysB);
 
   // Status bar
   const statusEl = document.getElementById('flightDetailStatus');
@@ -4190,9 +4171,9 @@ function renderHoleList() {
       : '';
     html += `<div class="hole-row${isAfterConclusion ? ' concluded-marker' : ''}">
       <span class="hole-num">${i+1}</span>
-      <button class="hole-btn${val === 1 ? ' active-a' : ''}" onclick="setHole(${i},1)">${labelA}</button>
+      <button class="hole-btn${val === 1 ? ' active-a' : ''}" onclick="setHole(${i},1)">A</button>
       <button class="hole-btn${val === 0 ? ' active-draw' : ''}" onclick="setHole(${i},0)">=</button>
-      <button class="hole-btn${val === -1 ? ' active-b' : ''}" onclick="setHole(${i},-1)">${labelB}</button>
+      <button class="hole-btn${val === -1 ? ' active-b' : ''}" onclick="setHole(${i},-1)">B</button>
       <div>${scoreHtml}</div>
     </div>`;
   }
