@@ -647,6 +647,53 @@ audio::-webkit-media-controls-panel {
 .team-members .member { display: inline-block; margin-right: 10px; padding: 2px 8px; background: var(--bg-soft); border-radius: 999px; margin-bottom: 4px; font-size: 12px; }
 .team-day { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
 
+/* Quick Beer FAB */
+.beer-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.beer-fab-counter {
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 32px;
+  text-align: center;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.beer-fab-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--gold);
+  border: none;
+  color: var(--bg);
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.beer-fab-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
 footer {
   text-align: center; padding: 30px 20px;
   color: var(--muted); font-size: 11px; line-height: 1.6;
@@ -2054,6 +2101,11 @@ body.detail-open .notification-center {
   <div class="legend-hof" id="legendHof"></div>
 </section>
 
+</div>
+
+<div class="beer-fab">
+  <div class="beer-fab-counter" id="beerFabCounter">0</div>
+  <button class="beer-fab-btn" id="beerFabBtn" title="Bier hinzufügen">🍺</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -3655,6 +3707,7 @@ function updateBeer() {
 
   if (todayCount === 100) toast('🥚 EASTER EGG: 100-Bier-Marke! Legende!');
   updatePromille();
+  if (typeof updateBeerFabCounter === 'function') updateBeerFabCounter();
 }
 
 function updatePromille() {
@@ -4599,6 +4652,17 @@ async function saveFlightResult() {
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
 
+// Beer FAB Button
+document.getElementById('beerFabBtn').addEventListener('click', () => {
+  adjust('beer', 1);
+  updateBeerFabCounter();
+});
+
+function updateBeerFabCounter() {
+  const today = currentProfile ? getCloudValue(currentProfile, 'beer') : 0;
+  document.getElementById('beerFabCounter').textContent = today;
+}
+
 // === Legends (Hall of Fame seit 2012) ===
 const LEGENDS = [
   { year: 2012, location: "Bad Bellingen", winners: ["Consti","Guy","Zimmi","Schmu"], losers: ["Raphi","Heule","Tery","Zwicky"] },
@@ -4696,6 +4760,7 @@ markPastScheduleItems();
 markPastInfoItems();
 updateTripStats();
 updateCountdown();
+updateBeerFabCounter();
 setInterval(updateCountdown, 60000);
 loadWeather();
 
