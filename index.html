@@ -1176,6 +1176,122 @@ body.detail-open .notification-center {
 .history-cell input:focus { outline: 1px solid var(--gold); border-color: var(--gold); }
 .history-empty { color: var(--muted); font-size: 12px; margin: 0; padding: 4px 0; }
 
+.history-new-row {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.history-new-row-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.history-new-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.history-new-date label {
+  font-size: 11px;
+  color: var(--muted);
+}
+.history-new-date input[type="date"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+.history-new-date input[type="date"]:focus {
+  outline: 1px solid var(--gold);
+  border-color: var(--gold);
+}
+.history-new-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.history-new-value {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.history-new-value label {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+.history-new-value input {
+  width: 100%;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+  font-family: inherit;
+}
+.history-new-value input:focus {
+  outline: 1px solid var(--gold);
+  border-color: var(--gold);
+}
+.history-new-btn {
+  display: flex;
+  gap: 6px;
+}
+.history-new-btn button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+}
+.history-new-btn .btn {
+  background: var(--gold);
+  color: var(--bg);
+}
+.history-new-btn .btn:active {
+  opacity: 0.8;
+}
+
+@media (min-width: 600px) {
+  .history-new-row {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .history-new-date {
+    flex: 1;
+    min-width: 120px;
+  }
+  .history-new-values {
+    grid-template-columns: 80px 80px 80px;
+    gap: 8px;
+  }
+  .history-new-btn {
+    flex: 0;
+  }
+  .history-new-btn button {
+    flex: 0;
+    width: 44px;
+    padding: 8px;
+  }
+}
+
 .notification-header {
   border-bottom: 1px solid var(--border);
   color: var(--gold);
@@ -1273,6 +1389,130 @@ body.detail-open .notification-center {
   padding: 20px;
   text-align: center;
 }
+
+/* Legends */
+.legend-intro {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: -8px 0 16px;
+  font-style: italic;
+}
+.legend-hof {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.legend-hof-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.legend-hof-item:last-child {
+  border-bottom: none;
+}
+.legend-hof-item.top1 {
+  background: rgba(212,177,74,0.1);
+  font-weight: 700;
+}
+.legend-hof-item.no-wins {
+  opacity: 0.6;
+}
+.legend-hof-rank {
+  color: var(--gold);
+  font-weight: 700;
+  min-width: 25px;
+}
+.legend-hof-name {
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  margin-left: 8px;
+}
+.legend-hof-part {
+  color: var(--muted);
+  font-size: 12px;
+  min-width: 35px;
+  text-align: right;
+}
+.legend-hof-wins {
+  color: var(--gold-soft);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 75px;
+  text-align: right;
+}
+.legend-year {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.legend-year-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.legend-year-num {
+  font-family: Georgia, serif;
+  color: var(--gold);
+  font-size: 22px;
+  font-weight: 700;
+}
+.legend-year-loc {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.legend-side {
+  margin-top: 8px;
+}
+.legend-side-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.legend-side.winner .legend-side-label { color: var(--gold); }
+.legend-side.loser .legend-side-label { color: var(--muted); }
+.legend-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.legend-player {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.legend-side.winner .legend-player {
+  background: rgba(212,177,74,0.15);
+  color: var(--text);
+  border-color: rgba(212,177,74,0.4);
+}
+.legend-player.captain {
+  background: var(--gold);
+  color: var(--bg);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.legend-side.loser .legend-player.captain {
+  background: var(--bg-soft);
+  color: var(--text);
+  border-color: var(--gold-soft);
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -1361,6 +1601,7 @@ body.detail-open .notification-center {
   <button class="tab" data-tab="players">Spieler</button>
   <button class="tab" data-tab="teams">Teams</button>
   <button class="tab" data-tab="results">Resultate</button>
+  <button class="tab" data-tab="legends">Legenden</button>
   <button class="tab" data-tab="equipment">Bag</button>
   <button class="tab" data-tab="trackers">Tracker</button>
   <button class="tab" data-tab="bingo">Spass</button>
@@ -1795,6 +2036,22 @@ body.detail-open .notification-center {
     <div class="row"><span class="lbl">Stromstecker</span><span class="val">Typ F (CH-Adapter!)</span></div>
     <div class="row"><span class="lbl">Trinkgeld</span><span class="val">~10% Restaurant</span></div>
   </div>
+</section>
+
+<section id="legends">
+  <h2>🏆 Legenden</h2>
+
+  <h3>Chronik</h3>
+  <div id="legendChronik"></div>
+
+  <h3 style="margin-top:24px;">Hall of Fame · Most Wins</h3>
+  <div style="display:flex; font-size:11px; color:var(--muted); padding:6px 10px; margin-bottom:4px; border-bottom:1px solid var(--border);">
+    <span style="min-width:25px;"></span>
+    <span style="flex:1; margin-left:8px;">Name</span>
+    <span style="min-width:35px; text-align:right;">Teil.</span>
+    <span style="min-width:75px; text-align:right;">Titel</span>
+  </div>
+  <div class="legend-hof" id="legendHof"></div>
 </section>
 
 </div>
@@ -2496,6 +2753,21 @@ function sortByTrophyTeam(members) {
   return members.slice().sort((a, b) => rank(a) - rank(b));
 }
 
+function splitByTeam(members) {
+  const sideA = [], sideB = [], unt = [];
+  members.forEach(k => {
+    const t = trophyTeamCache[k];
+    if (t === 'red') sideA.push(k);
+    else if (t === 'blue') sideB.push(k);
+    else unt.push(k);
+  });
+  unt.forEach(k => {
+    if (sideA.length <= sideB.length) sideA.push(k);
+    else sideB.push(k);
+  });
+  return { sideA, sideB };
+}
+
 function flightTeamCount(members, team) {
   return members.filter(k => getPlayerTeam(k) === team).length;
 }
@@ -2540,9 +2812,7 @@ function renderBuilder() {
       bc ? `<span style="color:#92c4e6;font-size:11px;">🔵${bc}</span>` : '',
     ].filter(Boolean).join(' ');
 
-    const half = Math.ceil(flight.members.length / 2);
-    const sA = flight.members.slice(0, half);
-    const sB = flight.members.slice(half);
+    const { sideA: sA, sideB: sB } = splitByTeam(flight.members);
     const chip = (key, fi) => {
       const nick = PLAYER_NICKNAMES[key] || key;
       const tc = playerTeamClass(key);
@@ -3160,6 +3430,23 @@ function getTotalCloudValue(playerKey, field) {
   return total;
 }
 
+function getBestDay(playerKey, field) {
+  let bestDate = null;
+  let bestCount = 0;
+  const prefix = playerKey + '__' + field + '__';
+  for (const key in CLOUD_STATS) {
+    if (key.startsWith(prefix)) {
+      const date = key.substring(prefix.length);
+      const count = parseInt(CLOUD_STATS[key] || '0', 10);
+      if (count > bestCount) {
+        bestCount = count;
+        bestDate = date;
+      }
+    }
+  }
+  return { date: bestDate, count: bestCount };
+}
+
 function invalidateTotalCache(playerKey, field) {
   const cacheKey = playerKey + '__' + field;
   delete TOTAL_CACHE[cacheKey];
@@ -3186,7 +3473,15 @@ function renderTrackerHistory() {
     if (parts.length !== 3) return;
     datesSet.add(parts[2]);
   });
-  datesSet.add(getTrackingDate());
+
+  const startDate = new Date('2026-05-14');
+  const today = new Date(getTrackingDate() + 'T00:00:00');
+  let current = new Date(startDate);
+  while (current <= today) {
+    const dateStr = current.toISOString().split('T')[0];
+    datesSet.add(dateStr);
+    current.setDate(current.getDate() + 1);
+  }
 
   const dates = Array.from(datesSet).sort().reverse();
   if (dates.length === 0) {
@@ -3195,7 +3490,32 @@ function renderTrackerHistory() {
   }
 
   const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-  container.innerHTML = dates.map(date => {
+  let html = '<div class="history-new-row">'
+    + '<div style="width:100%;"><div class="history-new-row-label">+ Neuer Tag</div></div>'
+    + '<div class="history-new-date">'
+    +   '<label>Datum</label>'
+    +   '<input type="date" id="newHistoryDate">'
+    + '</div>'
+    + '<div class="history-new-values">'
+    +   '<div class="history-new-value">'
+    +     '<label>🍺 Bier</label>'
+    +     '<input type="number" id="newHistoryBeer" min="0" value="0">'
+    +   '</div>'
+    +   '<div class="history-new-value">'
+    +     '<label>⚪ Bälle</label>'
+    +     '<input type="number" id="newHistoryBalls" min="0" value="0">'
+    +   '</div>'
+    +   '<div class="history-new-value">'
+    +     '<label>🏌️ Birdie</label>'
+    +     '<input type="number" id="newHistoryBirdies" min="0" value="0">'
+    +   '</div>'
+    + '</div>'
+    + '<div class="history-new-btn">'
+    +   '<button class="btn" onclick="addNewHistoryEntry()">Speichern</button>'
+    + '</div>'
+    + '</div>';
+
+  html += dates.map(date => {
     const d = new Date(date + 'T12:00:00');
     const label = dayNames[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
     const beer = parseInt(CLOUD_STATS[currentProfile + '__beer__' + date] || 0, 10);
@@ -3209,7 +3529,8 @@ function renderTrackerHistory() {
       + '</div>';
   }).join('');
 
-  container.querySelectorAll('input[type="number"]').forEach(input => {
+  container.innerHTML = html;
+  container.querySelectorAll('input[type="number"][data-field]').forEach(input => {
     input.addEventListener('change', () => saveHistoryValue(input));
   });
 }
@@ -3240,6 +3561,61 @@ async function saveHistoryValue(input) {
   }
 }
 
+async function addNewHistoryEntry() {
+  const dateInput = document.getElementById('newHistoryDate');
+  const beerInput = document.getElementById('newHistoryBeer');
+  const ballsInput = document.getElementById('newHistoryBalls');
+  const birdiesInput = document.getElementById('newHistoryBirdies');
+
+  if (!dateInput.value) {
+    toast('Bitte Datum wählen');
+    return;
+  }
+
+  const date = dateInput.value;
+  const beer = Math.max(0, parseInt(beerInput.value, 10) || 0);
+  const balls = Math.max(0, parseInt(ballsInput.value, 10) || 0);
+  const birdies = Math.max(0, parseInt(birdiesInput.value, 10) || 0);
+
+  if (beer === 0 && balls === 0 && birdies === 0) {
+    toast('Mindestens ein Wert erforderlich');
+    return;
+  }
+
+  const player = currentProfile;
+  try {
+    const updates = [];
+    if (beer > 0) updates.push({ key: player + '__beer__' + date, value: beer });
+    if (balls > 0) updates.push({ key: player + '__balls__' + date, value: balls });
+    if (birdies > 0) updates.push({ key: player + '__birdies__' + date, value: birdies });
+
+    for (const upd of updates) {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set', key: upd.key, value: upd.value }),
+      });
+      if (!res.ok) throw new Error('save failed');
+      CLOUD_STATS[upd.key] = upd.value;
+      invalidateTotalCache(player, upd.key.split('__')[1]);
+    }
+
+    dateInput.value = '';
+    beerInput.value = '0';
+    ballsInput.value = '0';
+    birdiesInput.value = '0';
+
+    if (typeof updateBeer === 'function') updateBeer();
+    if (typeof updateBalls === 'function') updateBalls();
+    if (typeof updateBirdies === 'function') updateBirdies();
+    if (typeof updateTripStats === 'function') updateTripStats();
+    renderTrackerHistory();
+    toast('✓ Eintrag hinzugefügt');
+  } catch (e) {
+    toast('Fehler beim Speichern');
+  }
+}
+
 function adjust(type, delta) {
   if (type === 'beer') {
     if (delta > 0) toast('🍺 Prost!');
@@ -3262,7 +3638,21 @@ function updateBeer() {
   const totalCount = currentProfile ? getTotalCloudValue(currentProfile, 'beer') : 0;
   document.getElementById('beerToday').textContent = todayCount;
   document.getElementById('beerTotal').textContent = totalCount + ' 🍺';
-  document.getElementById('beerRecord').textContent = totalCount;
+
+  if (currentProfile) {
+    const best = getBestDay(currentProfile, 'beer');
+    if (best.date) {
+      const d = new Date(best.date + 'T00:00:00');
+      const dayName = ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+      const day = d.getDate();
+      document.getElementById('beerRecord').textContent = best.count + ' (' + dayName + ' ' + day + '.)';
+    } else {
+      document.getElementById('beerRecord').textContent = '–';
+    }
+  } else {
+    document.getElementById('beerRecord').textContent = '–';
+  }
+
   if (todayCount === 100) toast('🥚 EASTER EGG: 100-Bier-Marke! Legende!');
   updatePromille();
 }
@@ -3861,8 +4251,7 @@ function getFlightSides(date, fi) {
     }
     return { sideA, sideB };
   }
-  const half = Math.ceil(members.length / 2);
-  return { sideA: members.slice(0, half), sideB: members.slice(half) };
+  return splitByTeam(members);
 }
 
 function sideNames(keys) {
@@ -4210,11 +4599,88 @@ async function saveFlightResult() {
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
 
+// === Legends (Hall of Fame seit 2012) ===
+const LEGENDS = [
+  { year: 2012, location: "Bad Bellingen", winners: ["Consti","Guy","Zimmi","Schmu"], losers: ["Raphi","Heule","Tery","Zwicky"] },
+  { year: 2013, location: "Marbella", winners: ["Thöme","Guy","Zimmi","Schmu"], losers: ["Consti","Raphi","Tery","Zwicky"] },
+  { year: 2014, location: "Marbella", winners: ["Thöme","Guy","Raphi","Heule"], losers: ["Consti","Zimmi","Tery","Debi"] },
+  { year: 2015, location: "Mallorca", winners: ["Consti","Zimmi","Tery","Flo","Boris"], losers: ["Thöme","Guy","Raphi","Wyser","Schmu"] },
+  { year: 2016, location: "Marbella", winners: ["Consti","Raphi","Tery","Wyser","Schmu"], losers: ["Thöme","Heule","Debi","Flo"] },
+  { year: 2017, location: "Lissabon", winners: ["Consti","Guy","Tery","Heule","Wyser","Inauen"], losers: ["Thöme","Zimmi","Raphi","Debi","Flo","Länz","Schmu"] },
+  { year: 2018, location: "Belek", winners: ["Thöme","Zimmi","Flo","Länz"], losers: ["Consti","Tery","Heule","Debi","Inauen"] },
+  { year: 2019, location: "Faro", winners: ["Consti","Tery","Flo","Länz","Carlo"], losers: ["Thöme","Guy","Raphi","Heule","Debi"] },
+  { year: 2020, location: "Starnberger See", winners: ["Flo","Länz","Carlo","Lieni"], losers: ["Consti","Raphi","Tery","Heule","Debi"] },
+  { year: 2021, location: "Tessin", winners: ["Thöme","Lieni","Flo","Debi","Zimmi","Wyser","Raphi"], losers: ["Consti","Guy","Steko","Länz","Heule","Manu","Tery"] },
+  { year: 2022, location: "Bogogno", winners: ["Thöme","Guy","Tery","Heule","Flo","Länz","Manu","Pulfer"], losers: ["Consti","Raphi","Zimmi","Debi","Wyser","Carlo","Lieni","Steko"] },
+  { year: 2023, location: "Bad Griesbach", winners: ["Raphi","Zimmi","Flo","Lieni","Pulfer","Dölf","Consti"], losers: ["Thöme","Heule","Wyser","Debi","Länz","Manu"] },
+  { year: 2024, location: "El Rompido", winners: ["Lieni","Heule","Wyser","Carlo","Pulfer","Dölf"], losers: ["Consti","Raphi","Thöme","Debi","Flo","Länz"] },
+  { year: 2025, location: "Belek", winners: ["Consti","Debi","Flo","Länz","Carlo","Dölf","Karl"], losers: ["Lieni","Raphi","Thöme","Zimmi","Guy","Heule","Pulfer"] },
+];
+
+function renderLegends() {
+  const stats = {};
+  LEGENDS.forEach(y => {
+    y.winners.forEach((p, i) => {
+      if (!stats[p]) stats[p] = { wins: 0, captain: 0, participations: 0 };
+      stats[p].wins++;
+      stats[p].participations++;
+      if (i === 0) stats[p].captain++;
+    });
+    y.losers.forEach((p, i) => {
+      if (!stats[p]) stats[p] = { wins: 0, captain: 0, participations: 0 };
+      stats[p].participations++;
+    });
+  });
+  const ranked = Object.entries(stats)
+    .map(([name, s]) => ({ name, ...s }))
+    .sort((a, b) => b.wins - a.wins || b.captain - a.captain || b.participations - a.participations || a.name.localeCompare(b.name));
+
+  const topWins = ranked[0].wins;
+  const hof = document.getElementById('legendHof');
+  hof.innerHTML = ranked.map((r, idx) => {
+    const isTop = r.wins > 0 && r.wins === topWins;
+    const noWins = r.wins === 0;
+    const cap = r.captain > 0 ? '(' + r.captain + '× C.)' : '';
+    return '<div class="legend-hof-item' + (isTop ? ' top1' : '') + (noWins ? ' no-wins' : '') + '">'
+      + '<span class="legend-hof-rank">#' + (idx + 1) + '</span>'
+      + '<span class="legend-hof-name">' + r.name + '</span>'
+      + '<span class="legend-hof-part">' + r.participations + '×</span>'
+      + '<span class="legend-hof-wins">' + r.wins + '<span style="color:var(--muted);font-size:11px;"> ' + cap + '</span></span>'
+      + '</div>';
+  }).join('');
+
+  const chronik = document.getElementById('legendChronik');
+  const sorted = LEGENDS.slice().sort((a, b) => b.year - a.year);
+  chronik.innerHTML = sorted.map(y => {
+    const winnersHtml = y.winners.map((p, i) =>
+      '<span class="legend-player' + (i === 0 ? ' captain' : '') + '">' + p + '</span>'
+    ).join('');
+    const losersHtml = y.losers.map((p, i) =>
+      '<span class="legend-player' + (i === 0 ? ' captain' : '') + '">' + p + '</span>'
+    ).join('');
+    return '<div class="legend-year">'
+      + '<div class="legend-year-head">'
+      +   '<span class="legend-year-num">' + y.year + '</span>'
+      +   '<span class="legend-year-loc">📍 ' + y.location + '</span>'
+      + '</div>'
+      + '<div class="legend-side winner">'
+      +   '<div class="legend-side-label">🏆 Sieger · Captain ' + y.winners[0] + '</div>'
+      +   '<div class="legend-players">' + winnersHtml + '</div>'
+      + '</div>'
+      + '<div class="legend-side loser">'
+      +   '<div class="legend-side-label">Unterlegen · Captain ' + y.losers[0] + '</div>'
+      +   '<div class="legend-players">' + losersHtml + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 // === START ===
 initProfile();
 initTabs();
 initPlayerCards();
 initCourses();
+renderLegends();
 loadAllTeams();
 loadAllResults();
 loadTrophyTeams();
