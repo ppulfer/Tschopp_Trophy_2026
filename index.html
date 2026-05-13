@@ -2785,7 +2785,7 @@ function buildHeroRow(namesA, namesB, hA, hB, score, lastPlayed, onclick, state,
     const cellB = winB ? badge(hB, margin, 'b') : badgeEmpty;
     const middle = halved
       ? `<div class="hero-match-hole" style="color:var(--muted);font-size:11px;">AS</div>`
-      : `<div class="hero-match-hole" style="color:var(--green-good);font-size:13px;">✓</div>`;
+      : `<div class="hero-match-hole" style="color:var(--green-good);font-size:12px;">F</div>`;
     return `<div class="hero-match-row" onclick="${onclick}" style="cursor:pointer;">
       ${cellA}
       ${namesHtml(namesA, hA, winA, 'a')}
