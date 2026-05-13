@@ -401,7 +401,7 @@ async function checkLockStatus() {
   try {
     const res = await fetch('/api/trophy-teams');
     const data = await res.json();
-    const locked = data['__locked'] === 'true';
+    const locked = data['__locked'] === 'true' || data['__locked'] === true;
     document.getElementById('trophyLockToggle').checked = locked;
     const stateEl = document.getElementById('toggleState');
     stateEl.textContent = locked ? '🔒 Gesperrt' : '🔓 Offen';
