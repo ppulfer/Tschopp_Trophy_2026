@@ -107,25 +107,98 @@ td { padding: 8px 10px; }
   border: 1px solid rgba(212,177,74,0.2); border-radius: 6px;
   padding: 6px 10px; font-size: 13px;
 }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 4px;
+  border-bottom: 1px solid rgba(212,177,74,0.2);
+  margin: 16px 0 20px;
+}
+.tab-btn {
+  background: transparent; color: #9bb0a4;
+  border: none; border-bottom: 2px solid transparent;
+  padding: 10px 16px; font-size: 14px; font-weight: 600;
+  cursor: pointer; border-radius: 0;
+  font-family: inherit;
+}
+.tab-btn:hover { background: rgba(212,177,74,0.05); color: #d4b14a; }
+.tab-btn.active {
+  color: #d4b14a; border-bottom-color: #d4b14a; background: transparent;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Settings toggle */
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #143729; border: 1px solid rgba(212,177,74,0.15);
+  border-radius: 8px; padding: 14px 16px; gap: 16px;
+  margin-bottom: 10px;
+}
+.setting-info .setting-title { font-weight: 600; color: #f3ead2; font-size: 14px; }
+.setting-info .setting-desc { font-size: 12px; color: #9bb0a4; margin-top: 2px; }
+.toggle-switch { position: relative; cursor: pointer; flex-shrink: 0; }
+.toggle-switch input { display: none; }
+.toggle-track {
+  display: block;
+  width: 44px; height: 24px;
+  background: rgba(78,163,107,0.5);
+  border-radius: 999px;
+  transition: background 0.2s;
+  position: relative;
+}
+.toggle-track::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s;
+}
+.toggle-switch input:checked + .toggle-track { background: #c5634d; }
+.toggle-switch input:checked + .toggle-track::before { left: 22px; }
+.toggle-state {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #4ea36b;
+  min-width: 60px; text-align: right;
+}
+.toggle-state.locked { color: #c5634d; }
 </style>
 </head>
 <body>
 <div class="container">
   <p style="margin:0 0 4px"><a href="/">← Back to App</a></p>
-  <h1>⚙️ Stats Admin</h1>
-
-  <div class="auth-bar">
-    <button onclick="loadStats()">🔄 Load Stats</button>
-  </div>
+  <h1>⚙️ Admin</h1>
 
   <div id="statusMsg"></div>
 
-  <h2>🔒 Trophy Teams</h2>
-  <div id="lockStatus" class="status info" style="display:inline-block;margin-bottom:10px;">Checking lock status…</div><br>
-  <button class="ghost" onclick="unlockTrophyTeams()">🔓 Teams entsperren</button>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="stats">📊 Stats</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+  </div>
 
-  <h2>📊 Stats</h2>
-  <div id="statsContent"></div>
+  <div class="tab-panel active" id="panel-stats">
+    <div class="auth-bar">
+      <button onclick="loadStats()">🔄 Neu laden</button>
+    </div>
+    <div id="statsContent"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-settings">
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-title">Trophy-Teams</div>
+        <div class="setting-desc">Wenn gesperrt, können Spieler ihre Team-Zuteilung nicht mehr ändern.</div>
+      </div>
+      <span class="toggle-state" id="toggleState">…</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="trophyLockToggle" onchange="onLockToggle()">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -329,38 +402,50 @@ async function checkLockStatus() {
     const res = await fetch('/api/trophy-teams');
     const data = await res.json();
     const locked = data['__locked'] === 'true';
-    const el = document.getElementById('lockStatus');
-    if (locked) {
-      el.textContent = '🔒 Teams sind fixiert';
-      el.className = 'status error';
-    } else {
-      el.textContent = '🔓 Teams sind offen (nicht fixiert)';
-      el.className = 'status success';
-    }
+    document.getElementById('trophyLockToggle').checked = locked;
+    const stateEl = document.getElementById('toggleState');
+    stateEl.textContent = locked ? '🔒 Gesperrt' : '🔓 Offen';
+    stateEl.classList.toggle('locked', locked);
   } catch(e) {
-    document.getElementById('lockStatus').textContent = 'Fehler beim Laden';
+    document.getElementById('toggleState').textContent = 'Fehler';
   }
 }
 
-async function unlockTrophyTeams() {
-  if (!confirm('Teams wirklich entsperren?')) return;
+async function onLockToggle() {
+  const checkbox = document.getElementById('trophyLockToggle');
+  const shouldLock = checkbox.checked;
+  const stateEl = document.getElementById('toggleState');
+  stateEl.textContent = shouldLock ? '🔒 Gesperrt' : '🔓 Offen';
+  stateEl.classList.toggle('locked', shouldLock);
   try {
     const res = await fetch('/api/trophy-teams', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerKey: '__locked', team: '' }),
+      body: JSON.stringify({ playerKey: '__locked', team: shouldLock ? 'true' : '' }),
     });
     if (!res.ok) throw new Error(await res.text());
-    localStorage.setItem('tt2026__locked', 'false');
-    showStatus('Teams erfolgreich entsperrt', 'success');
-    checkLockStatus();
+    localStorage.setItem('tt2026__locked', shouldLock ? 'true' : 'false');
+    showStatus(shouldLock ? 'Teams gesperrt' : 'Teams entsperrt', 'success');
   } catch(e) {
     showStatus(`Fehler: ${e.message}`, 'error');
+    checkbox.checked = !shouldLock;
+    stateEl.textContent = !shouldLock ? '🔒 Gesperrt' : '🔓 Offen';
+    stateEl.classList.toggle('locked', !shouldLock);
   }
 }
 
-checkLockStatus();
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'panel-' + target);
+    });
+  });
+});
+
 loadStats();
+checkLockStatus();
 </script>
 </body>
 </html>
