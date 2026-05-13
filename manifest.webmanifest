@@ -1,13 +1,18 @@
 {
+  "id": "/",
   "name": "Tschopp Trophy 2026",
   "short_name": "Tschopp Trophy",
   "description": "Tschopp Trophy 2026 — Companion App",
+  "lang": "de",
+  "dir": "ltr",
+  "categories": ["sports", "lifestyle"],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0e2920",
   "theme_color": "#0e2920",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
