@@ -1104,20 +1104,6 @@ body.detail-open .notification-center {
   top: -8px;
 }
 
-.beer-badge {
-  background: var(--gold);
-  border-radius: 50%;
-  color: var(--bg);
-  font-size: 11px;
-  font-weight: 700;
-  min-width: 18px;
-  padding: 2px 4px;
-  position: absolute;
-  right: -8px;
-  text-align: center;
-  top: -8px;
-}
-
 .notification-panel {
   background: var(--bg-card);
   border: 2px solid var(--gold);
@@ -1359,6 +1345,33 @@ body.detail-open .notification-center {
   padding: 0;
 }
 
+.notification-quick-add {
+  display: flex;
+  gap: 6px;
+  padding: 10px 15px;
+  border-top: 1px solid rgba(212,177,74,0.1);
+  background: var(--bg-soft);
+}
+
+.notification-quick-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.notification-quick-btn:active {
+  background: var(--bg-soft);
+  border-color: var(--gold);
+}
+
 .notification-item {
   border-bottom: 1px solid rgba(212, 177, 74, 0.1);
   color: var(--text);
@@ -1548,9 +1561,6 @@ body.detail-open .notification-center {
 
 <!-- Notification Center -->
 <div class="notification-center">
-  <button class="notification-button" id="beerBtn" title="Bier hinzufügen">
-    🍺 <span class="beer-badge" id="beerBadge">0</span>
-  </button>
   <button class="notification-button" id="notificationBtn" title="Letzte Ereignisse">
     🔔 <span class="notification-badge" id="notificationBadge">0</span>
   </button>
@@ -1565,6 +1575,11 @@ body.detail-open .notification-center {
     </div>
     <div class="notification-list" id="notificationList">
       <div class="empty-state">Keine Ereignisse</div>
+    </div>
+    <div class="notification-quick-add">
+      <button class="notification-quick-btn" id="quickAddBeer" title="Bier hinzufügen">🍺+1</button>
+      <button class="notification-quick-btn" id="quickAddBalls" title="Ball verloren">⚪+1</button>
+      <button class="notification-quick-btn" id="quickAddBirdies" title="Birdie">🏌️+1</button>
     </div>
   </div>
 </div>
@@ -3672,7 +3687,6 @@ function updateBeer() {
 
   if (todayCount === 100) toast('🥚 EASTER EGG: 100-Bier-Marke! Legende!');
   updatePromille();
-  if (typeof updateBeerBadge === 'function') updateBeerBadge();
 }
 
 function updatePromille() {
@@ -4617,16 +4631,19 @@ async function saveFlightResult() {
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
 
-// Beer Button
-document.getElementById('beerBtn').addEventListener('click', () => {
+// Quick-add buttons in notification panel
+document.getElementById('quickAddBeer').addEventListener('click', () => {
   adjust('beer', 1);
-  updateBeerBadge();
+  if (typeof updateBeer === 'function') updateBeer();
 });
-
-function updateBeerBadge() {
-  const today = currentProfile ? getCloudValue(currentProfile, 'beer') : 0;
-  document.getElementById('beerBadge').textContent = today;
-}
+document.getElementById('quickAddBalls').addEventListener('click', () => {
+  adjust('balls', 1);
+  if (typeof updateBalls === 'function') updateBalls();
+});
+document.getElementById('quickAddBirdies').addEventListener('click', () => {
+  adjust('birdies', 1);
+  if (typeof updateBirdies === 'function') updateBirdies();
+});
 
 // === Legends (Hall of Fame seit 2012) ===
 const LEGENDS = [
@@ -4725,7 +4742,6 @@ markPastScheduleItems();
 markPastInfoItems();
 updateTripStats();
 updateCountdown();
-updateBeerBadge();
 setInterval(updateCountdown, 60000);
 loadWeather();
 
