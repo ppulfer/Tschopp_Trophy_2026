@@ -2674,6 +2674,10 @@ function renderHeroTeamScore() {
     });
   });
 
+  const heroBonus = getTrackerBonus();
+  allA += heroBonus.a;
+  allB += heroBonus.b;
+
   const fmt = v => v % 1 === 0 ? String(v) : v.toFixed(1);
   document.getElementById('heroScoreA').textContent = fmt(allA);
   document.getElementById('heroScoreB').textContent = fmt(allB);
@@ -3047,10 +3051,81 @@ function updateTripStats() {
   if (topBirdiesEl) topBirdiesEl.textContent = topBirdiesPlayer ? topBirdiesPlayer.name + ' · ' + topBirdiesCount : '–';
 }
 
+// === SPECIAL TRACKERS (Longest Drive, Nearest to Pin) ===
+let TRACKERS_CACHE = {};
+
+async function loadTrackersCloud() {
+  try { const s = localStorage.getItem('tt2026__trackersCache'); if (s) TRACKERS_CACHE = JSON.parse(s); } catch(e) {}
+  try {
+    const res = await fetch('/api/trackers');
+    if (res.ok) {
+      TRACKERS_CACHE = (await res.json()) || {};
+      try { localStorage.setItem('tt2026__trackersCache', JSON.stringify(TRACKERS_CACHE)); } catch(e) {}
+    }
+  } catch(e) {}
+}
+
+function getTrackerValue(playerKey, field) {
+  const v = TRACKERS_CACHE[playerKey + '__' + field];
+  if (v === undefined || v === null || v === '') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function getTrackerWinner(field, mode) {
+  let winner = null, best = null;
+  for (const p of PLAYERS) {
+    const v = getTrackerValue(p.key, field);
+    if (v === null || v <= 0) continue;
+    if (best === null
+      || (mode === 'max' && v > best)
+      || (mode === 'min' && v < best)) {
+      best = v;
+      winner = p;
+    }
+  }
+  return winner ? { player: winner, value: best } : null;
+}
+
+function getTrackerBonus() {
+  let a = 0, b = 0;
+  const ld = getTrackerWinner('longestDrive', 'max');
+  const np = getTrackerWinner('nearestPin', 'min');
+  [ld, np].forEach(w => {
+    if (!w) return;
+    const t = trophyTeamCache[w.player.key];
+    if (t === 'red') a += 1;
+    else if (t === 'blue') b += 1;
+  });
+  return { a, b, ld, np };
+}
+
+async function saveTrackerCloud(player, field, value) {
+  if (!player) return;
+  const key = player + '__' + field;
+  if (value === '' || value === null) {
+    delete TRACKERS_CACHE[key];
+  } else {
+    TRACKERS_CACHE[key] = parseFloat(value);
+  }
+  try { localStorage.setItem('tt2026__trackersCache', JSON.stringify(TRACKERS_CACHE)); } catch(e) {}
+  renderResultsTab();
+  renderHeroTeamScore();
+  try {
+    await fetch('/api/trackers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player, field, value }),
+    });
+  } catch(e) { toast('Speichern fehlgeschlagen'); }
+}
+
 function loadTrackers() {
   ['longestDrive','nearestPin'].forEach(f => {
     const el = document.getElementById(f);
-    if (el) el.value = loadField(f, '');
+    if (!el) return;
+    const cloudVal = currentProfile ? getTrackerValue(currentProfile, f) : null;
+    el.value = cloudVal !== null ? cloudVal : loadField(f, '');
   });
   document.getElementById('weightInput').value = loadField('weight','');
   updateBeer();
@@ -3058,16 +3133,26 @@ function loadTrackers() {
   updateBirdies();
 }
 
+const trackerSaveTimers = {};
 function attachTrackerListeners() {
-  ['longestDrive','nearestPin','weightInput'].forEach(f => {
+  ['longestDrive','nearestPin'].forEach(f => {
     const el = document.getElementById(f);
     if (!el) return;
     el.addEventListener('input', function() {
-      const fieldName = f === 'weightInput' ? 'weight' : f;
-      saveField(fieldName, el.value);
-      if (f === 'weightInput') updatePromille();
+      saveField(f, el.value);
+      const profileAtInput = currentProfile;
+      const valueAtInput = el.value;
+      clearTimeout(trackerSaveTimers[f]);
+      trackerSaveTimers[f] = setTimeout(() => saveTrackerCloud(profileAtInput, f, valueAtInput), 600);
     });
   });
+  const weightEl = document.getElementById('weightInput');
+  if (weightEl) {
+    weightEl.addEventListener('input', function() {
+      saveField('weight', weightEl.value);
+      updatePromille();
+    });
+  }
   document.getElementById('teamDaySelect').addEventListener('change', loadTeamInput);
 }
 
@@ -3268,8 +3353,8 @@ function parseDate(dateStr) {
 }
 
 function markPastScheduleItems() {
-  const today = new Date();
-  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   document.querySelectorAll('.sched-item').forEach(item => {
     const dateText = item.querySelector('.sched-date')?.textContent || '';
@@ -3282,7 +3367,7 @@ function markPastScheduleItems() {
 
       const itemDate = new Date(year, month - 1, day);
 
-      if (today >= endOfToday && itemDate < endOfToday) {
+      if (itemDate < startOfToday) {
         item.classList.add('past');
       } else {
         item.classList.remove('past');
@@ -3292,8 +3377,8 @@ function markPastScheduleItems() {
 }
 
 function markPastInfoItems() {
-  const today = new Date();
-  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const infoSection = document.getElementById('info');
 
   if (!infoSection) return;
@@ -3304,7 +3389,7 @@ function markPastInfoItems() {
     const dateMatch = text.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
     if (dateMatch) {
       const dateToCheck = parseDate(text);
-      if (dateToCheck && dateToCheck < endOfToday) {
+      if (dateToCheck && dateToCheck < startOfToday) {
         item.style.opacity = '0.5';
       } else {
         item.style.opacity = '';
@@ -3547,7 +3632,6 @@ function renderResultsTab() {
 }
 
 function renderResultsSummary(date, dayA, dayB) {
-  // Aggregate all days
   let allA = 0, allB = 0;
   const flights_by_date = {};
   Object.keys(teamsCache).forEach(d => {
@@ -3566,7 +3650,25 @@ function renderResultsSummary(date, dayA, dayB) {
     });
   });
 
+  const bonus = getTrackerBonus();
+  allA += bonus.a;
+  allB += bonus.b;
+
   const fmt = v => v % 1 === 0 ? String(v) : v.toFixed(1);
+  const teamHex = key => {
+    const t = trophyTeamCache[key];
+    return t === 'red' ? '#f4a18d' : t === 'blue' ? '#92c4e6' : 'var(--gold)';
+  };
+  const winnerLine = (w, unit) => {
+    if (!w) return '<span style="color:var(--muted);">–</span>';
+    const teamLabel = trophyTeamCache[w.player.key] === 'red'
+      ? ' · <span style="color:#f4a18d;font-size:11px;">+1 Parli</span>'
+      : trophyTeamCache[w.player.key] === 'blue'
+        ? ' · <span style="color:#92c4e6;font-size:11px;">+1 Consti</span>'
+        : '';
+    return `<b style="color:${teamHex(w.player.key)};">${w.player.name}</b> · ${w.value}${unit}${teamLabel}`;
+  };
+
   document.getElementById('resultsSummary').innerHTML = `
     <div class="results-summary-card">
       <div class="results-summary-row">
@@ -3574,8 +3676,16 @@ function renderResultsSummary(date, dayA, dayB) {
         <span><b style="color:#f4a18d;">${fmt(dayA)}</b> · Parli &nbsp;–&nbsp; Consti · <b style="color:#92c4e6;">${fmt(dayB)}</b></span>
       </div>
       <div class="results-summary-row">
-        <span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;">Gesamtstand</span>
+        <span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;">Gesamtstand inkl. Bonus</span>
         <span><b style="color:#f4a18d;">${fmt(allA)}</b> · Parli &nbsp;–&nbsp; Consti · <b style="color:#92c4e6;">${fmt(allB)}</b></span>
+      </div>
+      <div class="results-summary-row">
+        <span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;">🏌️ Longest Drive</span>
+        <span>${winnerLine(bonus.ld, ' m')}</span>
+      </div>
+      <div class="results-summary-row">
+        <span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;">🎯 Nearest to Pin</span>
+        <span>${winnerLine(bonus.np, ' m')}</span>
       </div>
     </div>`;
 }
@@ -3797,6 +3907,11 @@ loadAllTeams();
 loadAllResults();
 loadTrophyTeams();
 loadTeamInput();
+loadTrackersCloud().then(() => {
+  loadTrackers();
+  renderResultsTab();
+  renderHeroTeamScore();
+});
 attachTrackerListeners();
 refreshAll();
 markPastScheduleItems();
@@ -4082,6 +4197,7 @@ document.addEventListener('visibilitychange', () => {
     flushPendingTracks();
     loadTrophyTeams();
     loadAllResults();
+    loadTrackersCloud().then(() => { loadTrackers(); renderResultsTab(); renderHeroTeamScore(); });
   }
 });
 
