@@ -1870,10 +1870,7 @@ body.detail-open .notification-center {
 <!-- Flight detail overlay -->
 <div class="flight-detail-overlay" id="flightDetailOverlay" style="display:none;">
   <div class="flight-detail-header">
-    <div style="display:flex;gap:8px;">
-      <button class="flight-detail-close" id="flightDetailDelete" title="Resultat löschen" style="background:none;color:var(--red-bad);font-size:20px;">🗑️</button>
-      <button class="flight-detail-close" id="flightDetailClose">×</button>
-    </div>
+    <button class="flight-detail-close" id="flightDetailClose">×</button>
     <div class="flight-detail-title" id="flightDetailTitle"></div>
   </div>
   <div id="flightDetailTabs" style="display:none;" class="singles-tabs"></div>
@@ -4561,15 +4558,6 @@ function closeFlightDetail() {
   renderResultsTab();
 }
 
-function deleteFlightResult() {
-  if (!confirm('Resultat wirklich löschen?')) return;
-  const key = getResultKey(detailDate, detailFlightIdx, detailMatchIdx);
-  delete resultsCache[key];
-  try { localStorage.setItem('tt2026__resultsCache', JSON.stringify(resultsCache)); } catch(e) {}
-  closeFlightDetail();
-  toast('✓ Resultat gelöscht');
-}
-
 function renderHoleList() {
   const { afterHole, concludedOn, result } = calculateMatch(detailHoles);
   const { sideA, sideB } = getFlightSides(detailDate, detailFlightIdx);
@@ -4641,7 +4629,6 @@ async function saveFlightResult() {
 }
 
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
-document.getElementById('flightDetailDelete').addEventListener('click', deleteFlightResult);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
 
 // Quick-add buttons in notification panel
