@@ -2756,6 +2756,12 @@ function renderTeams() {
   });
 }
 
+function ensureFlightIds(flights) {
+  flights.forEach((f, i) => {
+    if (!f.id) f.id = 'flight_' + Date.now() + '_' + i;
+  });
+}
+
 async function loadTeamInput() {
   const date = document.getElementById('teamDaySelect').value;
   if (teamsCache[date]) {
@@ -2768,6 +2774,7 @@ async function loadTeamInput() {
       teamsCache[date] = builderFlights;
     } catch(e) { builderFlights = []; }
   }
+  ensureFlightIds(builderFlights);
   builderActiveFlight = builderFlights.length > 0 ? 0 : null;
   renderBuilder();
 }
@@ -2955,7 +2962,8 @@ function singlesSetPlayer(fi, memberIdx, key) {
 function builderAddFlight() {
   const date = document.getElementById('teamDaySelect')?.value;
   const members = isSingles(date) ? ['', ''] : [];
-  builderFlights.push({ name: 'Flight ' + (builderFlights.length + 1), members });
+  const id = 'flight_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  builderFlights.push({ id, name: 'Flight ' + (builderFlights.length + 1), members });
   builderActiveFlight = builderFlights.length - 1;
   renderBuilder();
 }
@@ -3151,8 +3159,8 @@ function renderHeroTeamScore() {
 
   let allA = 0, allB = 0;
   Object.keys(teamsCache).forEach(d => {
-    (teamsCache[d] || []).forEach((_, fi) => {
-      iterateFlightResults(d, fi, (holes) => {
+    (teamsCache[d] || []).forEach((flight) => {
+      iterateFlightResults(d, flight.id, (holes) => {
         const { result } = calculateMatch(holes);
         if (!result) return;
         if (result.winner === 'a') allA += 1;
@@ -3176,30 +3184,30 @@ function renderHeroTeamScore() {
   const trackingDate = getTrackingDate();
 
   const candidates = [];
-  (teamsCache[trackingDate] || []).forEach((flight, fi) => {
+  (teamsCache[trackingDate] || []).forEach((flight) => {
     if (isSingles(trackingDate)) {
-      const count = singlesMatchCount(trackingDate, fi);
-      for (let mi = 0; mi < count; mi++) candidates.push({ date: trackingDate, fi, mi });
+      const count = singlesMatchCount(trackingDate, flight.id);
+      for (let mi = 0; mi < count; mi++) candidates.push({ date: trackingDate, flightId: flight.id, mi });
     } else {
-      candidates.push({ date: trackingDate, fi, mi: null });
+      candidates.push({ date: trackingDate, flightId: flight.id, mi: null });
     }
   });
   Object.keys(teamsCache).forEach(d => {
     if (d === trackingDate) return;
-    (teamsCache[d] || []).forEach((flight, fi) => {
+    (teamsCache[d] || []).forEach((flight) => {
       if (isSingles(d)) {
-        const count = singlesMatchCount(d, fi);
+        const count = singlesMatchCount(d, flight.id);
         for (let mi = 0; mi < count; mi++) {
-          const cached = resultsCache[getResultKey(d, fi, mi)];
+          const cached = resultsCache[getResultKey(d, flight.id, mi)];
           if (!cached?.holes) continue;
           const { lastPlayed, result } = calculateMatch(cached.holes);
-          if (lastPlayed >= 0 && !result) candidates.push({ date: d, fi, mi });
+          if (lastPlayed >= 0 && !result) candidates.push({ date: d, flightId: flight.id, mi });
         }
       } else {
-        const cached = resultsCache[getResultKey(d, fi, null)];
+        const cached = resultsCache[getResultKey(d, flight.id, null)];
         if (!cached?.holes) return;
         const { lastPlayed, result } = calculateMatch(cached.holes);
-        if (lastPlayed >= 0 && !result) candidates.push({ date: d, fi, mi: null });
+        if (lastPlayed >= 0 && !result) candidates.push({ date: d, flightId: flight.id, mi: null });
       }
     });
   });
@@ -3210,16 +3218,16 @@ function renderHeroTeamScore() {
       if (b.date === trackingDate) return 1;
       return a.date.localeCompare(b.date);
     }
-    if (a.fi !== b.fi) return a.fi - b.fi;
+    if (a.flightId !== b.flightId) return a.flightId.localeCompare(b.flightId);
     return (a.mi ?? -1) - (b.mi ?? -1);
   });
 
-  candidates.forEach(({ date, fi, mi }) => {
-    const cached = resultsCache[getResultKey(date, fi, mi)];
+  candidates.forEach(({ date, flightId, mi }) => {
+    const cached = resultsCache[getResultKey(date, flightId, mi)];
     const holes = cached?.holes;
     const calc = holes ? calculateMatch(holes) : { score: 0, lastPlayed: -1, result: null };
     const state = calc.result ? 'done' : (calc.lastPlayed >= 0 ? 'live' : 'pending');
-    const { sideA, sideB } = getFlightSides(date, fi);
+    const { sideA, sideB } = getFlightSides(date, flightId);
     const keysA = mi !== null ? [sideA[mi]] : sideA;
     const keysB = mi !== null ? [sideB[mi]] : sideB;
     const namesA = keysA.map(k => PLAYER_NICKNAMES[k] || k || '—');
@@ -3227,8 +3235,8 @@ function renderHeroTeamScore() {
     const hA = teamHex(sideColor(keysA));
     const hB = teamHex(sideColor(keysB));
     const onclick = mi !== null
-      ? `openFlightDetail('${date}',${fi},${mi})`
-      : `openFlightDetail('${date}',${fi})`;
+      ? `openFlightDetail('${date}','${flightId}',${mi})`
+      : `openFlightDetail('${date}','${flightId}')`;
     matchRows.push(buildHeroRow(namesA, namesB, hA, hB, calc.score, calc.lastPlayed, onclick, state, calc.result));
   });
 
@@ -4156,6 +4164,7 @@ function resetData() {
 let resultsCache = {};
 let detailDate = null;
 let detailFlightIdx = null;
+let detailFlightId = null;
 let detailMatchIdx = null; // null = normal, 0/1/... = singles sub-match
 let detailHoles = new Array(18).fill(null);
 let saveResultTimer = null;
@@ -4200,25 +4209,26 @@ function styledNames(keys) {
   return keys.map(k => styledName(k)).join(' · ') || '—';
 }
 
-function getResultKey(date, fi, mi) {
-  return mi !== null ? `${date}__${fi}__${mi}` : `${date}__${fi}`;
+function getResultKey(date, flightId, mi) {
+  return mi !== null ? `${date}__${flightId}__${mi}` : `${date}__${flightId}`;
 }
 
-function singlesMatchCount(date, fi) {
+function singlesMatchCount(date, flightId) {
   const flights = teamsCache[date] || [];
-  const members = (flights[fi] || {}).members || [];
+  const flight = flights.find(f => f.id === flightId);
+  const members = (flight || {}).members || [];
   return Math.floor(members.filter(k => k).length / 2);
 }
 
-function iterateFlightResults(d, fi, cb) {
+function iterateFlightResults(d, flightId, cb) {
   if (isSingles(d)) {
-    const count = singlesMatchCount(d, fi);
+    const count = singlesMatchCount(d, flightId);
     for (let mi = 0; mi < count; mi++) {
-      const cached = resultsCache[getResultKey(d, fi, mi)];
+      const cached = resultsCache[getResultKey(d, flightId, mi)];
       if (cached?.holes) cb(cached.holes, mi);
     }
   } else {
-    const cached = resultsCache[getResultKey(d, fi, null)];
+    const cached = resultsCache[getResultKey(d, flightId, null)];
     if (cached?.holes) cb(cached.holes, null);
   }
 }
@@ -4272,9 +4282,10 @@ async function loadAllResults() {
   renderHeroTeamScore();
 }
 
-function getFlightSides(date, fi) {
+function getFlightSides(date, flightId) {
   const flights = teamsCache[date] || [];
-  const members = (flights[fi] || {}).members || [];
+  const flight = flights.find(f => f.id === flightId);
+  const members = (flight || {}).members || [];
   if (isSingles(date)) {
     const sideA = [], sideB = [];
     for (let i = 0; i + 1 < members.length; i += 2) {
@@ -4328,13 +4339,13 @@ function renderResultsTab() {
     return `<span class="results-match-pill none">–</span>`;
   }
 
-  container.innerHTML = flights.map((flight, fi) => {
-    const { sideA, sideB } = getFlightSides(date, fi);
+  container.innerHTML = flights.map((flight) => {
+    const { sideA, sideB } = getFlightSides(date, flight.id);
     if (isSingles(date)) {
-      const count = singlesMatchCount(date, fi);
+      const count = singlesMatchCount(date, flight.id);
       const matchRows = Array.from({ length: count }, (_, mi) => {
         const kA = sideA[mi], kB = sideB[mi];
-        const cached = resultsCache[getResultKey(date, fi, mi)];
+        const cached = resultsCache[getResultKey(date, flight.id, mi)];
         const holes = cached?.holes || new Array(18).fill(null);
         return `<div class="singles-match-row">
           <div class="results-sides">
@@ -4342,15 +4353,15 @@ function renderResultsTab() {
             <div class="results-vs">vs</div>
             <div class="results-side b">${styledName(kB)}</div>
           </div>
-          <div class="result-row"><div style="flex:1;text-align:center;">${resultDisplay(holes, [kA], [kB])}</div><button class="results-detail-btn" style="float:none;" onclick="openFlightDetail('${date}',${fi},${mi})">Detail →</button></div>
+          <div class="result-row"><div style="flex:1;text-align:center;">${resultDisplay(holes, [kA], [kB])}</div><button class="results-detail-btn" style="float:none;" onclick="openFlightDetail('${date}','${flight.id}',${mi})">Detail →</button></div>
         </div>`;
       }).join('');
       return `<div class="results-flight-card"><div class="results-flight-name">${flight.name}</div>${matchRows}</div>`;
     } else {
-      const cached = resultsCache[getResultKey(date, fi, null)];
+      const cached = resultsCache[getResultKey(date, flight.id, null)];
       const holes = cached?.holes || new Array(18).fill(null);
       return `<div class="results-flight-card">
-        <div class="results-flight-name">${flight.name} <button class="results-detail-btn" onclick="openFlightDetail('${date}',${fi})">Detail →</button></div>
+        <div class="results-flight-name">${flight.name} <button class="results-detail-btn" onclick="openFlightDetail('${date}','${flight.id}')">Detail →</button></div>
         <div class="results-sides">
           <div class="results-side a">${styledNames(sideA)}</div>
           <div class="results-vs">vs</div>
@@ -4372,8 +4383,8 @@ function renderResultsSummary(date, dayA, dayB) {
   });
   Object.keys(flights_by_date).forEach(d => {
     const flights = flights_by_date[d];
-    flights.forEach((_, fi) => {
-      iterateFlightResults(d, fi, (holes) => {
+    flights.forEach((flight) => {
+      iterateFlightResults(d, flight.id, (holes) => {
         const { result } = calculateMatch(holes);
         if (!result) return;
         if (result.winner === 'a') allA += 1;
@@ -4433,7 +4444,7 @@ function setDetailMode(mode) {
 }
 
 function renderQuickForm() {
-  const { sideA, sideB } = getFlightSides(detailDate, detailFlightIdx);
+  const { sideA, sideB } = getFlightSides(detailDate, detailFlightId);
   const nameA = isSingles(detailDate)
     ? (PLAYER_NICKNAMES[sideA[detailMatchIdx]] || sideA[detailMatchIdx] || 'A')
     : sideNames(sideA);
@@ -4491,12 +4502,14 @@ function saveQuickResult() {
   renderHoleList();
 }
 
-function openFlightDetail(date, fi, mi) {
+function openFlightDetail(date, flightId, mi) {
   detailDate = date;
-  detailFlightIdx = fi;
+  detailFlightId = flightId;
+  const flights = teamsCache[date] || [];
+  detailFlightIdx = flights.findIndex(f => f.id === flightId);
   detailMatchIdx = isSingles(date) ? (mi ?? 0) : null;
 
-  const key = getResultKey(date, fi, detailMatchIdx);
+  const key = getResultKey(date, flightId, detailMatchIdx);
   const cached = resultsCache[key];
   detailHoles = cached?.holes ? [...cached.holes] : new Array(18).fill(null);
 
@@ -4515,20 +4528,19 @@ function openFlightDetail(date, fi, mi) {
     quickWinner = null; quickMarginN = 1; quickMarginM = 0;
   }
 
-  const flights = teamsCache[date] || [];
-  const flight = flights[fi] || {};
-  const { sideA, sideB } = getFlightSides(date, fi);
+  const flight = flights.find(f => f.id === flightId) || {};
+  const { sideA, sideB } = getFlightSides(date, flightId);
 
   document.getElementById('flightDetailTitle').textContent = `${flight.name || 'Flight'} · ${date.slice(8,10)}.${date.slice(5,7)}.`;
 
   const tabsEl = document.getElementById('flightDetailTabs');
   if (isSingles(date)) {
-    const count = singlesMatchCount(date, fi);
+    const count = singlesMatchCount(date, flightId);
     tabsEl.style.display = 'flex';
     tabsEl.innerHTML = Array.from({ length: count }, (_, i) => {
       const pA = PLAYER_NICKNAMES[sideA[i]] || sideA[i] || `A${i+1}`;
       const pB = PLAYER_NICKNAMES[sideB[i]] || sideB[i] || `B${i+1}`;
-      return `<button class="match-tab${i === detailMatchIdx ? ' active' : ''}" onclick="openFlightDetail('${date}',${fi},${i})">${pA} vs ${pB}</button>`;
+      return `<button class="match-tab${i === detailMatchIdx ? ' active' : ''}" onclick="openFlightDetail('${date}','${flightId}',${i})">${pA} vs ${pB}</button>`;
     }).join('');
     document.getElementById('flightDetailPlayers').innerHTML = `
       <span class="side-a">${styledName(sideA[detailMatchIdx])}</span>
@@ -4617,7 +4629,7 @@ function setHole(holeIdx, val) {
 
 async function saveFlightResult() {
   const apiFlightIdx = detailMatchIdx !== null ? `${detailFlightIdx}__${detailMatchIdx}` : detailFlightIdx;
-  const cacheKey = getResultKey(detailDate, detailFlightIdx, detailMatchIdx);
+  const cacheKey = getResultKey(detailDate, detailFlightId, detailMatchIdx);
   try {
     await fetch('/api/results', {
       method: 'POST',
