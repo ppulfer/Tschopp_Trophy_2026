@@ -323,6 +323,20 @@ a { color: var(--gold); text-decoration: none; }
 }
 .counter-btn:active { transform: scale(0.95); }
 .counter-btn.minus { color: var(--red-bad); border-color: var(--red-bad); }
+.konsum-counter {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.konsum-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  padding: 14px;
+  gap: 8px;
+}
+.konsum-divider { height: 1px; background: var(--border); margin: 0 14px; }
 
 input[type="number"], input[type="text"], select, textarea {
   background: var(--bg-soft); color: var(--text);
@@ -1123,55 +1137,43 @@ body.detail-open .notification-center {
   flex-direction: column;
 }
 
-.tracker-history-wrap summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 0;
-  list-style: none;
-  user-select: none;
-}
-.tracker-history-wrap summary::-webkit-details-marker { display: none; }
-.tracker-history-wrap summary::before {
-  content: '▸';
-  display: inline-block;
-  margin-right: 6px;
-  transition: transform 0.15s;
-  color: var(--gold);
-}
-.tracker-history-wrap[open] summary::before { transform: rotate(90deg); }
-.history-row {
-  display: grid;
-  grid-template-columns: minmax(72px, auto) 1fr 1fr 1fr;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 0;
+.history-day-card {
+  padding: 10px 0;
   border-bottom: 1px solid rgba(212,177,74,0.08);
 }
-.history-row:last-child { border-bottom: none; }
-.history-date {
-  color: var(--muted);
+.history-day-card:last-child { border-bottom: none; }
+.history-day-header {
   font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+.history-day-fields {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 .history-cell {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
 }
+.history-cell span { font-size: 18px; line-height: 1; }
 .history-cell input {
-  width: 48px;
+  width: 100%;
+  min-height: 42px;
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  padding: 4px 2px;
+  font-size: 15px;
   text-align: center;
   font-family: inherit;
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 .history-cell input:focus { outline: 1px solid var(--gold); border-color: var(--gold); }
 .history-empty { color: var(--muted); font-size: 12px; margin: 0; padding: 4px 0; }
@@ -1218,29 +1220,37 @@ body.detail-open .notification-center {
 }
 .history-new-values {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 }
 .history-new-value {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
 }
 .history-new-value label {
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
 }
+.history-new-value label .lv-icon { font-size: 18px; }
+.history-new-value label .lv-text { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .history-new-value input {
   width: 100%;
-  padding: 8px 4px;
-  border-radius: 6px;
+  min-height: 42px;
+  padding: 4px 2px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   text-align: center;
   font-family: inherit;
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 .history-new-value input:focus {
   outline: 1px solid var(--gold);
@@ -1248,25 +1258,22 @@ body.detail-open .notification-center {
 }
 .history-new-btn {
   display: flex;
-  gap: 6px;
 }
-.history-new-btn button {
+.history-new-btn .btn {
   flex: 1;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
+  border-radius: 8px;
   border: none;
   font-weight: 700;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   font-family: inherit;
-}
-.history-new-btn .btn {
   background: var(--gold);
   color: var(--bg);
+  touch-action: manipulation;
+  min-height: 46px;
 }
-.history-new-btn .btn:active {
-  opacity: 0.8;
-}
+.history-new-btn .btn:active { opacity: 0.8; }
 
 @media (min-width: 600px) {
   .history-new-row {
@@ -1279,16 +1286,17 @@ body.detail-open .notification-center {
     min-width: 120px;
   }
   .history-new-values {
-    grid-template-columns: 80px 80px 80px;
+    grid-template-columns: repeat(4, 80px);
     gap: 8px;
   }
   .history-new-btn {
     flex: 0;
   }
-  .history-new-btn button {
+  .history-new-btn .btn {
     flex: 0;
-    width: 44px;
-    padding: 8px;
+    width: auto;
+    padding: 8px 20px;
+    min-height: unset;
   }
 }
 
@@ -1578,6 +1586,7 @@ body.detail-open .notification-center {
     </div>
     <div class="notification-quick-add">
       <button class="notification-quick-btn" id="quickAddBeer" title="Bier hinzufügen">🍺+1</button>
+      <button class="notification-quick-btn" id="quickAddSchirmli" title="Schirmlidrink hinzufügen">🍹+1</button>
       <button class="notification-quick-btn" id="quickAddBalls" title="Ball verloren">⚪+1</button>
       <button class="notification-quick-btn" id="quickAddBirdies" title="Birdie">🏌️+1</button>
     </div>
@@ -1662,11 +1671,16 @@ body.detail-open .notification-center {
       <div class="stat-lbl">Bier total</div>
     </div>
     <div class="stat-tile">
+      <div class="stat-icon">🍹</div>
+      <div class="stat-num" id="statTotalSchirmli">0</div>
+      <div class="stat-lbl">Schirmlis total</div>
+    </div>
+    <div class="stat-tile">
       <div class="stat-icon">🏌️</div>
       <div class="stat-num" id="statTotalBalls">0</div>
       <div class="stat-lbl">Bälle weg</div>
     </div>
-    <div class="stat-tile" style="grid-column: span 2;">
+    <div class="stat-tile">
       <div class="stat-icon">🐥</div>
       <div class="stat-num" id="statTotalBirdies">0</div>
       <div class="stat-lbl">Birdies total</div>
@@ -1674,6 +1688,7 @@ body.detail-open .notification-center {
   </div>
   <div class="card" style="margin-top:8px;">
     <div class="row"><span class="lbl">🍺 Top-Trinker</span><span class="val" id="statTopBeer">–</span></div>
+    <div class="row"><span class="lbl">🍹 Top Schirmli-Trinker</span><span class="val" id="statTopSchirmli">–</span></div>
     <div class="row"><span class="lbl">🌊 Atlantik-Spender</span><span class="val" id="statTopBalls">–</span></div>
     <div class="row"><span class="lbl">🐥 Top Birdie-Jäger</span><span class="val" id="statTopBirdies">–</span></div>
   </div>
@@ -1870,10 +1885,7 @@ body.detail-open .notification-center {
 <!-- Flight detail overlay -->
 <div class="flight-detail-overlay" id="flightDetailOverlay" style="display:none;">
   <div class="flight-detail-header">
-    <div style="display:flex;gap:8px;">
-      <button class="flight-detail-close" id="flightDetailDelete" title="Resultat löschen" style="background:none;color:var(--red-bad);font-size:20px;">🗑️</button>
-      <button class="flight-detail-close" id="flightDetailClose">×</button>
-    </div>
+    <button class="flight-detail-close" id="flightDetailClose">×</button>
     <div class="flight-detail-title" id="flightDetailTitle"></div>
   </div>
   <div id="flightDetailTabs" style="display:none;" class="singles-tabs"></div>
@@ -1920,21 +1932,32 @@ body.detail-open .notification-center {
   <h2>Live-Tracker</h2>
   <p class="small">Daten werden für alle synchronisiert.</p>
 
-  <h3>🍺 Bierkonsum (heute)</h3>
-  <div class="counter">
-    <div>
+  <h3>🥂 Konsum (heute)</h3>
+  <div class="konsum-counter">
+    <div class="konsum-row">
       <div class="counter-value" id="beerToday">0</div>
       <div class="counter-label">Bier heute</div>
+      <div class="counter-controls">
+        <button class="counter-btn minus" onclick="adjust('beer', -1)">−</button>
+        <button class="counter-btn" onclick="adjust('beer', 1)">+</button>
+      </div>
     </div>
-    <div class="counter-controls">
-      <button class="counter-btn minus" onclick="adjust('beer', -1)">−</button>
-      <button class="counter-btn" onclick="adjust('beer', 1)">+</button>
+    <div class="konsum-divider"></div>
+    <div class="konsum-row">
+      <div class="counter-value" id="schirmliToday">0</div>
+      <div class="counter-label">Schirmli heute</div>
+      <div class="counter-controls">
+        <button class="counter-btn minus" onclick="adjust('schirmli', -1)">−</button>
+        <button class="counter-btn" onclick="adjust('schirmli', 1)">+</button>
+      </div>
     </div>
   </div>
   <div class="card" style="margin-top:10px;">
-    <div class="row"><span class="lbl">Total Trip</span><span class="val" id="beerTotal">0 🍺</span></div>
-    <div class="row"><span class="lbl">Tagesbestmarke</span><span class="val" id="beerRecord">0</span></div>
-    <div class="row"><span class="lbl">Promille (geschätzt)</span><span class="val" id="promilleVal">0.00 ‰</span></div>
+    <div class="row"><span class="lbl">Bier · Total Trip</span><span class="val" id="beerTotal">0 🍺</span></div>
+    <div class="row"><span class="lbl">Bier · Bestmarke Tag</span><span class="val" id="beerRecord">–</span></div>
+    <div class="row" style="border-top:1px solid rgba(255,255,255,0.06);margin-top:6px;padding-top:6px;"><span class="lbl">Schirmli · Total Trip</span><span class="val" id="schirmliTotal">0 🍹</span></div>
+    <div class="row"><span class="lbl">Schirmli · Bestmarke Tag</span><span class="val" id="schirmliRecord">–</span></div>
+    <div class="row" style="border-top:1px solid rgba(255,255,255,0.06);margin-top:6px;padding-top:6px;"><span class="lbl">Promille (geschätzt)</span><span class="val" id="promilleVal">0.00 ‰</span></div>
     <div class="meter"><div class="meter-fill" id="promilleBar" style="width:0%; background: var(--muted);"></div></div>
     <p class="small" id="promilleStatus" style="margin-top:6px;">🔵 Noch nicht qualifiziert · 0.70‰ fehlen bis zur Auslosungs-Berechtigung</p>
     <label>Dein Gewicht (kg)</label>
@@ -1988,13 +2011,11 @@ body.detail-open .notification-center {
     <input type="number" id="nearestPin" step="0.1" placeholder="z.B. 2.4">
   </div>
 
-  <details class="tracker-history-wrap" style="margin-top:16px;">
-    <summary>📅 Verlauf bearbeiten</summary>
-    <div class="card" style="margin-top:8px;padding:10px 12px;">
-      <p class="small" style="margin:0 0 8px;">Korrektur deiner Tageswerte — auch nachträglich.</p>
-      <div id="trackerHistory"></div>
-    </div>
-  </details>
+  <h3>📅 Tracking korrigieren</h3>
+  <div class="card" style="padding:10px 12px;">
+    <p class="small" style="margin:0 0 8px;">Korrektur deiner Tageswerte — auch nachträglich.</p>
+    <div id="trackerHistory"></div>
+  </div>
 </section>
 
 <section id="bingo">
@@ -2759,6 +2780,12 @@ function renderTeams() {
   });
 }
 
+function ensureFlightIds(flights) {
+  flights.forEach((f, i) => {
+    if (!f.id) f.id = 'flight_' + Date.now() + '_' + i;
+  });
+}
+
 async function loadTeamInput() {
   const date = document.getElementById('teamDaySelect').value;
   if (teamsCache[date]) {
@@ -2771,6 +2798,7 @@ async function loadTeamInput() {
       teamsCache[date] = builderFlights;
     } catch(e) { builderFlights = []; }
   }
+  ensureFlightIds(builderFlights);
   builderActiveFlight = builderFlights.length > 0 ? 0 : null;
   renderBuilder();
 }
@@ -2958,7 +2986,8 @@ function singlesSetPlayer(fi, memberIdx, key) {
 function builderAddFlight() {
   const date = document.getElementById('teamDaySelect')?.value;
   const members = isSingles(date) ? ['', ''] : [];
-  builderFlights.push({ name: 'Flight ' + (builderFlights.length + 1), members });
+  const id = 'flight_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  builderFlights.push({ id, name: 'Flight ' + (builderFlights.length + 1), members });
   builderActiveFlight = builderFlights.length - 1;
   renderBuilder();
 }
@@ -3154,8 +3183,8 @@ function renderHeroTeamScore() {
 
   let allA = 0, allB = 0;
   Object.keys(teamsCache).forEach(d => {
-    (teamsCache[d] || []).forEach((_, fi) => {
-      iterateFlightResults(d, fi, (holes) => {
+    (teamsCache[d] || []).forEach((flight) => {
+      iterateFlightResults(d, flight.id, (holes) => {
         const { result } = calculateMatch(holes);
         if (!result) return;
         if (result.winner === 'a') allA += 1;
@@ -3179,30 +3208,30 @@ function renderHeroTeamScore() {
   const trackingDate = getTrackingDate();
 
   const candidates = [];
-  (teamsCache[trackingDate] || []).forEach((flight, fi) => {
+  (teamsCache[trackingDate] || []).forEach((flight) => {
     if (isSingles(trackingDate)) {
-      const count = singlesMatchCount(trackingDate, fi);
-      for (let mi = 0; mi < count; mi++) candidates.push({ date: trackingDate, fi, mi });
+      const count = singlesMatchCount(trackingDate, flight.id);
+      for (let mi = 0; mi < count; mi++) candidates.push({ date: trackingDate, flightId: flight.id, mi });
     } else {
-      candidates.push({ date: trackingDate, fi, mi: null });
+      candidates.push({ date: trackingDate, flightId: flight.id, mi: null });
     }
   });
   Object.keys(teamsCache).forEach(d => {
     if (d === trackingDate) return;
-    (teamsCache[d] || []).forEach((flight, fi) => {
+    (teamsCache[d] || []).forEach((flight) => {
       if (isSingles(d)) {
-        const count = singlesMatchCount(d, fi);
+        const count = singlesMatchCount(d, flight.id);
         for (let mi = 0; mi < count; mi++) {
-          const cached = resultsCache[getResultKey(d, fi, mi)];
+          const cached = resultsCache[getResultKey(d, flight.id, mi)];
           if (!cached?.holes) continue;
           const { lastPlayed, result } = calculateMatch(cached.holes);
-          if (lastPlayed >= 0 && !result) candidates.push({ date: d, fi, mi });
+          if (lastPlayed >= 0 && !result) candidates.push({ date: d, flightId: flight.id, mi });
         }
       } else {
-        const cached = resultsCache[getResultKey(d, fi, null)];
+        const cached = resultsCache[getResultKey(d, flight.id, null)];
         if (!cached?.holes) return;
         const { lastPlayed, result } = calculateMatch(cached.holes);
-        if (lastPlayed >= 0 && !result) candidates.push({ date: d, fi, mi: null });
+        if (lastPlayed >= 0 && !result) candidates.push({ date: d, flightId: flight.id, mi: null });
       }
     });
   });
@@ -3213,16 +3242,16 @@ function renderHeroTeamScore() {
       if (b.date === trackingDate) return 1;
       return a.date.localeCompare(b.date);
     }
-    if (a.fi !== b.fi) return a.fi - b.fi;
+    if (a.flightId !== b.flightId) return a.flightId.localeCompare(b.flightId);
     return (a.mi ?? -1) - (b.mi ?? -1);
   });
 
-  candidates.forEach(({ date, fi, mi }) => {
-    const cached = resultsCache[getResultKey(date, fi, mi)];
+  candidates.forEach(({ date, flightId, mi }) => {
+    const cached = resultsCache[getResultKey(date, flightId, mi)];
     const holes = cached?.holes;
     const calc = holes ? calculateMatch(holes) : { score: 0, lastPlayed: -1, result: null };
     const state = calc.result ? 'done' : (calc.lastPlayed >= 0 ? 'live' : 'pending');
-    const { sideA, sideB } = getFlightSides(date, fi);
+    const { sideA, sideB } = getFlightSides(date, flightId);
     const keysA = mi !== null ? [sideA[mi]] : sideA;
     const keysB = mi !== null ? [sideB[mi]] : sideB;
     const namesA = keysA.map(k => PLAYER_NICKNAMES[k] || k || '—');
@@ -3230,8 +3259,8 @@ function renderHeroTeamScore() {
     const hA = teamHex(sideColor(keysA));
     const hB = teamHex(sideColor(keysB));
     const onclick = mi !== null
-      ? `openFlightDetail('${date}',${fi},${mi})`
-      : `openFlightDetail('${date}',${fi})`;
+      ? `openFlightDetail('${date}','${flightId}',${mi})`
+      : `openFlightDetail('${date}','${flightId}')`;
     matchRows.push(buildHeroRow(namesA, namesB, hA, hB, calc.score, calc.lastPlayed, onclick, state, calc.result));
   });
 
@@ -3489,6 +3518,7 @@ function invalidateTotalCache(playerKey, field) {
 
 function refreshAllStatsUI() {
   if (typeof updateBeer === 'function') updateBeer();
+  if (typeof updateSchirmli === 'function') updateSchirmli();
   if (typeof updateBalls === 'function') updateBalls();
   if (typeof updateBirdies === 'function') updateBirdies();
   if (typeof updateTripStats === 'function') updateTripStats();
@@ -3533,15 +3563,19 @@ function renderTrackerHistory() {
     + '</div>'
     + '<div class="history-new-values">'
     +   '<div class="history-new-value">'
-    +     '<label>🍺 Bier</label>'
+    +     '<label><span class="lv-icon">🍺</span><span class="lv-text">Bier</span></label>'
     +     '<input type="number" id="newHistoryBeer" min="0" value="0">'
     +   '</div>'
     +   '<div class="history-new-value">'
-    +     '<label>⚪ Bälle</label>'
+    +     '<label><span class="lv-icon">🍹</span><span class="lv-text">Schirmli</span></label>'
+    +     '<input type="number" id="newHistorySchirmli" min="0" value="0">'
+    +   '</div>'
+    +   '<div class="history-new-value">'
+    +     '<label><span class="lv-icon">⚪</span><span class="lv-text">Bälle</span></label>'
     +     '<input type="number" id="newHistoryBalls" min="0" value="0">'
     +   '</div>'
     +   '<div class="history-new-value">'
-    +     '<label>🏌️ Birdie</label>'
+    +     '<label><span class="lv-icon">🏌️</span><span class="lv-text">Birdie</span></label>'
     +     '<input type="number" id="newHistoryBirdies" min="0" value="0">'
     +   '</div>'
     + '</div>'
@@ -3554,13 +3588,17 @@ function renderTrackerHistory() {
     const d = new Date(date + 'T12:00:00');
     const label = dayNames[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
     const beer = parseInt(CLOUD_STATS[currentProfile + '__beer__' + date] || 0, 10);
+    const schirmli = parseInt(CLOUD_STATS[currentProfile + '__schirmli__' + date] || 0, 10);
     const balls = parseInt(CLOUD_STATS[currentProfile + '__balls__' + date] || 0, 10);
     const birdies = parseInt(CLOUD_STATS[currentProfile + '__birdies__' + date] || 0, 10);
-    return '<div class="history-row">'
-      + '<span class="history-date">' + label + '</span>'
+    return '<div class="history-day-card">'
+      + '<div class="history-day-header">' + label + '</div>'
+      + '<div class="history-day-fields">'
       + '<label class="history-cell"><span>🍺</span><input type="number" min="0" value="' + beer + '" data-date="' + date + '" data-field="beer"></label>'
+      + '<label class="history-cell"><span>🍹</span><input type="number" min="0" value="' + schirmli + '" data-date="' + date + '" data-field="schirmli"></label>'
       + '<label class="history-cell"><span>⚪</span><input type="number" min="0" value="' + balls + '" data-date="' + date + '" data-field="balls"></label>'
       + '<label class="history-cell"><span>🏌️</span><input type="number" min="0" value="' + birdies + '" data-date="' + date + '" data-field="birdies"></label>'
+      + '</div>'
       + '</div>';
   }).join('');
 
@@ -3599,6 +3637,7 @@ async function saveHistoryValue(input) {
 async function addNewHistoryEntry() {
   const dateInput = document.getElementById('newHistoryDate');
   const beerInput = document.getElementById('newHistoryBeer');
+  const schirmliInput = document.getElementById('newHistorySchirmli');
   const ballsInput = document.getElementById('newHistoryBalls');
   const birdiesInput = document.getElementById('newHistoryBirdies');
 
@@ -3609,10 +3648,11 @@ async function addNewHistoryEntry() {
 
   const date = dateInput.value;
   const beer = Math.max(0, parseInt(beerInput.value, 10) || 0);
+  const schirmli = Math.max(0, parseInt(schirmliInput.value, 10) || 0);
   const balls = Math.max(0, parseInt(ballsInput.value, 10) || 0);
   const birdies = Math.max(0, parseInt(birdiesInput.value, 10) || 0);
 
-  if (beer === 0 && balls === 0 && birdies === 0) {
+  if (beer === 0 && schirmli === 0 && balls === 0 && birdies === 0) {
     toast('Mindestens ein Wert erforderlich');
     return;
   }
@@ -3621,6 +3661,7 @@ async function addNewHistoryEntry() {
   try {
     const updates = [];
     if (beer > 0) updates.push({ key: player + '__beer__' + date, value: beer });
+    if (schirmli > 0) updates.push({ key: player + '__schirmli__' + date, value: schirmli });
     if (balls > 0) updates.push({ key: player + '__balls__' + date, value: balls });
     if (birdies > 0) updates.push({ key: player + '__birdies__' + date, value: birdies });
 
@@ -3637,10 +3678,12 @@ async function addNewHistoryEntry() {
 
     dateInput.value = '';
     beerInput.value = '0';
+    schirmliInput.value = '0';
     ballsInput.value = '0';
     birdiesInput.value = '0';
 
     if (typeof updateBeer === 'function') updateBeer();
+    if (typeof updateSchirmli === 'function') updateSchirmli();
     if (typeof updateBalls === 'function') updateBalls();
     if (typeof updateBirdies === 'function') updateBirdies();
     if (typeof updateTripStats === 'function') updateTripStats();
@@ -3655,6 +3698,9 @@ function adjust(type, delta) {
   if (type === 'beer') {
     if (delta > 0) toast('🍺 Prost!');
     trackCloud('beer', delta);
+  } else if (type === 'schirmli') {
+    if (delta > 0) toast('🍹 Schirmli!');
+    trackCloud('schirmli', delta);
   } else if (type === 'balls') {
     if (delta > 0) {
       const reason = document.getElementById('lossReason').value;
@@ -3690,6 +3736,25 @@ function updateBeer() {
 
   if (todayCount === 100) toast('🥚 EASTER EGG: 100-Bier-Marke! Legende!');
   updatePromille();
+}
+
+function updateSchirmli() {
+  const todayCount = currentProfile ? getCloudValue(currentProfile, 'schirmli') : 0;
+  const totalCount = currentProfile ? getTotalCloudValue(currentProfile, 'schirmli') : 0;
+  document.getElementById('schirmliToday').textContent = todayCount;
+  document.getElementById('schirmliTotal').textContent = totalCount + ' 🍹';
+  if (currentProfile) {
+    const best = getBestDay(currentProfile, 'schirmli');
+    if (best.date) {
+      const d = new Date(best.date + 'T00:00:00');
+      const dayName = ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+      document.getElementById('schirmliRecord').textContent = best.count + ' (' + dayName + ' ' + d.getDate() + '.)';
+    } else {
+      document.getElementById('schirmliRecord').textContent = '–';
+    }
+  } else {
+    document.getElementById('schirmliRecord').textContent = '–';
+  }
 }
 
 function updatePromille() {
@@ -3752,20 +3817,23 @@ function updateBirdies() {
 
 // === TRIP STATS (alle Spieler aggregiert aus Cloud) ===
 function updateTripStats() {
-  let totalBeer = 0;
-  let totalBalls = 0;
-  let totalBirdies = 0;
+  let totalBeer = 0, totalSchirmli = 0, totalBalls = 0, totalBirdies = 0;
   let topBeerPlayer = null, topBeerCount = 0;
+  let topSchirmliPlayer = null, topSchirmliCount = 0;
   let topBallsPlayer = null, topBallsCount = 0;
   let topBirdiesPlayer = null, topBirdiesCount = 0;
 
   PLAYERS.forEach(p => {
     const beer = getTotalCloudValue(p.key, 'beer');
+    const schirmli = getTotalCloudValue(p.key, 'schirmli');
     const balls = getTotalCloudValue(p.key, 'balls');
     const birdies = getTotalCloudValue(p.key, 'birdies');
 
     totalBeer += beer;
     if (beer > topBeerCount) { topBeerCount = beer; topBeerPlayer = p; }
+
+    totalSchirmli += schirmli;
+    if (schirmli > topSchirmliCount) { topSchirmliCount = schirmli; topSchirmliPlayer = p; }
 
     totalBalls += balls;
     if (balls > topBallsCount) { topBallsCount = balls; topBallsPlayer = p; }
@@ -3775,15 +3843,19 @@ function updateTripStats() {
   });
 
   const beerEl = document.getElementById('statTotalBeer');
+  const schirmliEl = document.getElementById('statTotalSchirmli');
   const ballsEl = document.getElementById('statTotalBalls');
   const birdiesEl = document.getElementById('statTotalBirdies');
   const topBeerEl = document.getElementById('statTopBeer');
+  const topSchirmliEl = document.getElementById('statTopSchirmli');
   const topBallsEl = document.getElementById('statTopBalls');
   const topBirdiesEl = document.getElementById('statTopBirdies');
   if (beerEl) beerEl.textContent = totalBeer;
+  if (schirmliEl) schirmliEl.textContent = totalSchirmli;
   if (ballsEl) ballsEl.textContent = totalBalls;
   if (birdiesEl) birdiesEl.textContent = totalBirdies;
   if (topBeerEl) topBeerEl.textContent = topBeerPlayer ? topBeerPlayer.name + ' · ' + topBeerCount : '–';
+  if (topSchirmliEl) topSchirmliEl.textContent = topSchirmliPlayer ? topSchirmliPlayer.name + ' · ' + topSchirmliCount : '–';
   if (topBallsEl) topBallsEl.textContent = topBallsPlayer ? topBallsPlayer.name + ' · ' + topBallsCount : '–';
   if (topBirdiesEl) topBirdiesEl.textContent = topBirdiesPlayer ? topBirdiesPlayer.name + ' · ' + topBirdiesCount : '–';
 }
@@ -3866,6 +3938,7 @@ function loadTrackers() {
   });
   document.getElementById('weightInput').value = loadField('weight','');
   updateBeer();
+  updateSchirmli();
   updateBalls();
   updateBirdies();
 }
@@ -4159,6 +4232,7 @@ function resetData() {
 let resultsCache = {};
 let detailDate = null;
 let detailFlightIdx = null;
+let detailFlightId = null;
 let detailMatchIdx = null; // null = normal, 0/1/... = singles sub-match
 let detailHoles = new Array(18).fill(null);
 let saveResultTimer = null;
@@ -4203,25 +4277,26 @@ function styledNames(keys) {
   return keys.map(k => styledName(k)).join(' · ') || '—';
 }
 
-function getResultKey(date, fi, mi) {
-  return mi !== null ? `${date}__${fi}__${mi}` : `${date}__${fi}`;
+function getResultKey(date, flightId, mi) {
+  return mi !== null ? `${date}__${flightId}__${mi}` : `${date}__${flightId}`;
 }
 
-function singlesMatchCount(date, fi) {
+function singlesMatchCount(date, flightId) {
   const flights = teamsCache[date] || [];
-  const members = (flights[fi] || {}).members || [];
+  const flight = flights.find(f => f.id === flightId);
+  const members = (flight || {}).members || [];
   return Math.floor(members.filter(k => k).length / 2);
 }
 
-function iterateFlightResults(d, fi, cb) {
+function iterateFlightResults(d, flightId, cb) {
   if (isSingles(d)) {
-    const count = singlesMatchCount(d, fi);
+    const count = singlesMatchCount(d, flightId);
     for (let mi = 0; mi < count; mi++) {
-      const cached = resultsCache[getResultKey(d, fi, mi)];
+      const cached = resultsCache[getResultKey(d, flightId, mi)];
       if (cached?.holes) cb(cached.holes, mi);
     }
   } else {
-    const cached = resultsCache[getResultKey(d, fi, null)];
+    const cached = resultsCache[getResultKey(d, flightId, null)];
     if (cached?.holes) cb(cached.holes, null);
   }
 }
@@ -4231,21 +4306,27 @@ function calculateMatch(holes) {
   let score = 0;
   let lastPlayed = -1;
   let concludedOn = -1;
+  let playedCount = 0;
+  let playedCountAtConcluded = 0;
   const afterHole = new Array(n).fill(null);
   for (let i = 0; i < n; i++) {
     if (holes[i] == null) continue;
     score += holes[i];
+    playedCount++;
     lastPlayed = i;
     afterHole[i] = score;
-    const remaining = n - 1 - i;
-    if (concludedOn < 0 && Math.abs(score) > remaining) concludedOn = i;
+    const remaining = n - playedCount;
+    if (concludedOn < 0 && Math.abs(score) > remaining) {
+      concludedOn = i;
+      playedCountAtConcluded = playedCount;
+    }
   }
   let result = null;
   if (concludedOn >= 0) {
     const s = afterHole[concludedOn];
-    const rem = n - 1 - concludedOn;
+    const rem = n - playedCountAtConcluded;
     result = { winner: s > 0 ? 'a' : 'b', margin: rem === 0 ? Math.abs(s) + 'up' : Math.abs(s) + '&' + rem };
-  } else if (lastPlayed === n - 1) {
+  } else if (playedCount === n) {
     result = score === 0
       ? { winner: 'halved', margin: 'AS' }
       : { winner: score > 0 ? 'a' : 'b', margin: Math.abs(score) + 'up' };
@@ -4275,9 +4356,10 @@ async function loadAllResults() {
   renderHeroTeamScore();
 }
 
-function getFlightSides(date, fi) {
+function getFlightSides(date, flightId) {
   const flights = teamsCache[date] || [];
-  const members = (flights[fi] || {}).members || [];
+  const flight = flights.find(f => f.id === flightId);
+  const members = (flight || {}).members || [];
   if (isSingles(date)) {
     const sideA = [], sideB = [];
     for (let i = 0; i + 1 < members.length; i += 2) {
@@ -4331,13 +4413,13 @@ function renderResultsTab() {
     return `<span class="results-match-pill none">–</span>`;
   }
 
-  container.innerHTML = flights.map((flight, fi) => {
-    const { sideA, sideB } = getFlightSides(date, fi);
+  container.innerHTML = flights.map((flight) => {
+    const { sideA, sideB } = getFlightSides(date, flight.id);
     if (isSingles(date)) {
-      const count = singlesMatchCount(date, fi);
+      const count = singlesMatchCount(date, flight.id);
       const matchRows = Array.from({ length: count }, (_, mi) => {
         const kA = sideA[mi], kB = sideB[mi];
-        const cached = resultsCache[getResultKey(date, fi, mi)];
+        const cached = resultsCache[getResultKey(date, flight.id, mi)];
         const holes = cached?.holes || new Array(18).fill(null);
         return `<div class="singles-match-row">
           <div class="results-sides">
@@ -4345,15 +4427,15 @@ function renderResultsTab() {
             <div class="results-vs">vs</div>
             <div class="results-side b">${styledName(kB)}</div>
           </div>
-          <div class="result-row"><div style="flex:1;text-align:center;">${resultDisplay(holes, [kA], [kB])}</div><button class="results-detail-btn" style="float:none;" onclick="openFlightDetail('${date}',${fi},${mi})">Detail →</button></div>
+          <div class="result-row"><div style="flex:1;text-align:center;">${resultDisplay(holes, [kA], [kB])}</div><button class="results-detail-btn" style="float:none;" onclick="openFlightDetail('${date}','${flight.id}',${mi})">Detail →</button></div>
         </div>`;
       }).join('');
       return `<div class="results-flight-card"><div class="results-flight-name">${flight.name}</div>${matchRows}</div>`;
     } else {
-      const cached = resultsCache[getResultKey(date, fi, null)];
+      const cached = resultsCache[getResultKey(date, flight.id, null)];
       const holes = cached?.holes || new Array(18).fill(null);
       return `<div class="results-flight-card">
-        <div class="results-flight-name">${flight.name} <button class="results-detail-btn" onclick="openFlightDetail('${date}',${fi})">Detail →</button></div>
+        <div class="results-flight-name">${flight.name} <button class="results-detail-btn" onclick="openFlightDetail('${date}','${flight.id}')">Detail →</button></div>
         <div class="results-sides">
           <div class="results-side a">${styledNames(sideA)}</div>
           <div class="results-vs">vs</div>
@@ -4375,8 +4457,8 @@ function renderResultsSummary(date, dayA, dayB) {
   });
   Object.keys(flights_by_date).forEach(d => {
     const flights = flights_by_date[d];
-    flights.forEach((_, fi) => {
-      iterateFlightResults(d, fi, (holes) => {
+    flights.forEach((flight) => {
+      iterateFlightResults(d, flight.id, (holes) => {
         const { result } = calculateMatch(holes);
         if (!result) return;
         if (result.winner === 'a') allA += 1;
@@ -4436,7 +4518,7 @@ function setDetailMode(mode) {
 }
 
 function renderQuickForm() {
-  const { sideA, sideB } = getFlightSides(detailDate, detailFlightIdx);
+  const { sideA, sideB } = getFlightSides(detailDate, detailFlightId);
   const nameA = isSingles(detailDate)
     ? (PLAYER_NICKNAMES[sideA[detailMatchIdx]] || sideA[detailMatchIdx] || 'A')
     : sideNames(sideA);
@@ -4494,12 +4576,14 @@ function saveQuickResult() {
   renderHoleList();
 }
 
-function openFlightDetail(date, fi, mi) {
+function openFlightDetail(date, flightId, mi) {
   detailDate = date;
-  detailFlightIdx = fi;
+  detailFlightId = flightId;
+  const flights = teamsCache[date] || [];
+  detailFlightIdx = flights.findIndex(f => f.id === flightId);
   detailMatchIdx = isSingles(date) ? (mi ?? 0) : null;
 
-  const key = getResultKey(date, fi, detailMatchIdx);
+  const key = getResultKey(date, flightId, detailMatchIdx);
   const cached = resultsCache[key];
   detailHoles = cached?.holes ? [...cached.holes] : new Array(18).fill(null);
 
@@ -4518,20 +4602,19 @@ function openFlightDetail(date, fi, mi) {
     quickWinner = null; quickMarginN = 1; quickMarginM = 0;
   }
 
-  const flights = teamsCache[date] || [];
-  const flight = flights[fi] || {};
-  const { sideA, sideB } = getFlightSides(date, fi);
+  const flight = flights.find(f => f.id === flightId) || {};
+  const { sideA, sideB } = getFlightSides(date, flightId);
 
   document.getElementById('flightDetailTitle').textContent = `${flight.name || 'Flight'} · ${date.slice(8,10)}.${date.slice(5,7)}.`;
 
   const tabsEl = document.getElementById('flightDetailTabs');
   if (isSingles(date)) {
-    const count = singlesMatchCount(date, fi);
+    const count = singlesMatchCount(date, flightId);
     tabsEl.style.display = 'flex';
     tabsEl.innerHTML = Array.from({ length: count }, (_, i) => {
       const pA = PLAYER_NICKNAMES[sideA[i]] || sideA[i] || `A${i+1}`;
       const pB = PLAYER_NICKNAMES[sideB[i]] || sideB[i] || `B${i+1}`;
-      return `<button class="match-tab${i === detailMatchIdx ? ' active' : ''}" onclick="openFlightDetail('${date}',${fi},${i})">${pA} vs ${pB}</button>`;
+      return `<button class="match-tab${i === detailMatchIdx ? ' active' : ''}" onclick="openFlightDetail('${date}','${flightId}',${i})">${pA} vs ${pB}</button>`;
     }).join('');
     document.getElementById('flightDetailPlayers').innerHTML = `
       <span class="side-a">${styledName(sideA[detailMatchIdx])}</span>
@@ -4559,15 +4642,6 @@ function closeFlightDetail() {
   document.body.style.overflow = '';
   document.body.classList.remove('detail-open');
   renderResultsTab();
-}
-
-function deleteFlightResult() {
-  if (!confirm('Resultat wirklich löschen?')) return;
-  const key = getResultKey(detailDate, detailFlightIdx, detailMatchIdx);
-  delete resultsCache[key];
-  try { localStorage.setItem('tt2026__resultsCache', JSON.stringify(resultsCache)); } catch(e) {}
-  closeFlightDetail();
-  toast('✓ Resultat gelöscht');
 }
 
 function renderHoleList() {
@@ -4628,26 +4702,29 @@ function setHole(holeIdx, val) {
 }
 
 async function saveFlightResult() {
-  const apiFlightIdx = detailMatchIdx !== null ? `${detailFlightIdx}__${detailMatchIdx}` : detailFlightIdx;
-  const cacheKey = getResultKey(detailDate, detailFlightIdx, detailMatchIdx);
+  const matchKey = detailMatchIdx !== null ? `__${detailMatchIdx}` : '';
+  const cacheKey = getResultKey(detailDate, detailFlightId, detailMatchIdx);
   try {
     await fetch('/api/results', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: detailDate, flightIdx: apiFlightIdx, holes: detailHoles }),
+      body: JSON.stringify({ date: detailDate, flightId: detailFlightId, matchKey, holes: detailHoles }),
     });
     resultsCache[cacheKey] = { holes: [...detailHoles] };
   } catch(e) { console.warn('Save result failed', e); }
 }
 
 document.getElementById('flightDetailClose').addEventListener('click', closeFlightDetail);
-document.getElementById('flightDetailDelete').addEventListener('click', deleteFlightResult);
 document.getElementById('resultDaySelect').addEventListener('change', renderResultsTab);
 
 // Quick-add buttons in notification panel
 document.getElementById('quickAddBeer').addEventListener('click', () => {
   adjust('beer', 1);
   if (typeof updateBeer === 'function') updateBeer();
+});
+document.getElementById('quickAddSchirmli').addEventListener('click', () => {
+  adjust('schirmli', 1);
+  if (typeof updateSchirmli === 'function') updateSchirmli();
 });
 document.getElementById('quickAddBalls').addEventListener('click', () => {
   adjust('balls', 1);

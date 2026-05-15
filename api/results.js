@@ -16,7 +16,7 @@ export default async function handler(request) {
       const dateResults = {};
       Object.entries(parsed).forEach(([k, v]) => {
         if (k.startsWith(date + '__')) {
-          dateResults[parseInt(k.split('__')[1])] = v;
+          dateResults[k] = v;
         }
       });
       return new Response(JSON.stringify(dateResults), {
@@ -29,11 +29,12 @@ export default async function handler(request) {
   }
 
   if (request.method === 'POST') {
-    const { date, flightIdx, holes } = await request.json();
-    if (!date || flightIdx === undefined || !Array.isArray(holes)) {
+    const { date, flightId, matchKey, holes } = await request.json();
+    if (!date || !flightId || !Array.isArray(holes)) {
       return new Response(JSON.stringify({ error: 'invalid' }), { status: 400 });
     }
-    await kv.hset('trip_results', { [`${date}__${flightIdx}`]: JSON.stringify({ holes }) });
+    const key = `${date}__${flightId}${matchKey || ''}`;
+    await kv.hset('trip_results', { [key]: JSON.stringify({ holes }) });
     return new Response(JSON.stringify({ ok: true }), {
       headers: { 'Content-Type': 'application/json' },
     });
