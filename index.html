@@ -4238,21 +4238,27 @@ function calculateMatch(holes) {
   let score = 0;
   let lastPlayed = -1;
   let concludedOn = -1;
+  let playedCount = 0;
+  let playedCountAtConcluded = 0;
   const afterHole = new Array(n).fill(null);
   for (let i = 0; i < n; i++) {
     if (holes[i] == null) continue;
     score += holes[i];
+    playedCount++;
     lastPlayed = i;
     afterHole[i] = score;
-    const remaining = n - 1 - i;
-    if (concludedOn < 0 && Math.abs(score) > remaining) concludedOn = i;
+    const remaining = n - playedCount;
+    if (concludedOn < 0 && Math.abs(score) > remaining) {
+      concludedOn = i;
+      playedCountAtConcluded = playedCount;
+    }
   }
   let result = null;
   if (concludedOn >= 0) {
     const s = afterHole[concludedOn];
-    const rem = n - 1 - concludedOn;
+    const rem = n - playedCountAtConcluded;
     result = { winner: s > 0 ? 'a' : 'b', margin: rem === 0 ? Math.abs(s) + 'up' : Math.abs(s) + '&' + rem };
-  } else if (lastPlayed === n - 1) {
+  } else if (playedCount === n) {
     result = score === 0
       ? { winner: 'halved', margin: 'AS' }
       : { winner: score > 0 ? 'a' : 'b', margin: Math.abs(score) + 'up' };
