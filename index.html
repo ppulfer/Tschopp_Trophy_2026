@@ -1137,24 +1137,6 @@ body.detail-open .notification-center {
   flex-direction: column;
 }
 
-.tracker-history-wrap summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 0;
-  list-style: none;
-  user-select: none;
-}
-.tracker-history-wrap summary::-webkit-details-marker { display: none; }
-.tracker-history-wrap summary::before {
-  content: '▸';
-  display: inline-block;
-  margin-right: 6px;
-  transition: transform 0.15s;
-  color: var(--gold);
-}
-.tracker-history-wrap[open] summary::before { transform: rotate(90deg); }
 .history-day-card {
   padding: 10px 0;
   border-bottom: 1px solid rgba(212,177,74,0.08);
@@ -2024,13 +2006,11 @@ body.detail-open .notification-center {
     <input type="number" id="nearestPin" step="0.1" placeholder="z.B. 2.4">
   </div>
 
-  <details class="tracker-history-wrap" style="margin-top:16px;">
-    <summary>📅 Verlauf bearbeiten</summary>
-    <div class="card" style="margin-top:8px;padding:10px 12px;">
-      <p class="small" style="margin:0 0 8px;">Korrektur deiner Tageswerte — auch nachträglich.</p>
-      <div id="trackerHistory"></div>
-    </div>
-  </details>
+  <h3>📅 Tracking korrigieren</h3>
+  <div class="card" style="padding:10px 12px;">
+    <p class="small" style="margin:0 0 8px;">Korrektur deiner Tageswerte — auch nachträglich.</p>
+    <div id="trackerHistory"></div>
+  </div>
 </section>
 
 <section id="bingo">
