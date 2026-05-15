@@ -7,7 +7,7 @@ const VALID_PLAYERS = [
   'ruetimann','wieser','laenzlinger','hunter','graf','debrunner',
   'szimmermann','heule','wyser'
 ];
-const VALID_FIELDS = ['beer', 'balls', 'birdies'];
+const VALID_FIELDS = ['beer', 'schirmli', 'balls', 'birdies'];
 
 export default async function handler(request) {
   if (request.method !== 'POST') {

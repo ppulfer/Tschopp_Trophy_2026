@@ -4634,7 +4634,7 @@ function openFlightDetail(date, flightId, mi) {
   document.body.style.overflow = 'hidden';
   document.body.classList.add('detail-open');
   renderHoleList();
-  setDetailMode(existingResult ? 'quick' : 'detail');
+  setDetailMode('detail');
 }
 
 function closeFlightDetail() {
